@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Introduction to Data
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+# Module Plan
+
+- **Case studies**
+    - Spotify data!
+
+--
+
+- **Data basics**
+    - Datasets (in R)
+    - Types of variables
+    - Relationships between variables
+
+--
+
+- **Sampling strategies**
+    - Observational studies
+    - Sampling design
+
+--
+
+- **Experimental design**
+    - Association: What does it mean?
+    - Randomization
+    - Blocking
+
+---
+
+class: center, middle
+
+# Case Studies
+
+---
+
+# Jam Session
+
+[Spotify data](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-01-21/readme.md)
+
+- A *sample* of 10,458 songs from Spotify
+
+- Songs categorized as either **rock** or **pop**
+
+
+```
+## # A tibble: 10,458 x 3
+##    track_artist     playlist_genre danceability
+##    &lt;chr&gt;            &lt;chr&gt;                 &lt;dbl&gt;
+##  1 Ed Sheeran       pop                   0.748
+##  2 Maroon 5         pop                   0.726
+##  3 Zara Larsson     pop                   0.675
+##  4 The Chainsmokers pop                   0.718
+##  5 Lewis Capaldi    pop                   0.65 
+##  6 Ed Sheeran       pop                   0.675
+##  7 Katy Perry       pop                   0.449
+##  8 Sam Feldt        pop                   0.542
+##  9 Avicii           pop                   0.594
+## 10 Shawn Mendes     pop                   0.642
+## # … with 10,448 more rows
+```
+
+--
+
+**Question**: Is there a *relationship* between `genre` and `danceability`?
+
+---
+
+# Explortatory Data Analysis
+
+**Summary statistics**
+
+
+```
+## # A tibble: 2 x 4
+##   playlist_genre mean_dance sd_dance median_dance
+##   &lt;chr&gt;               &lt;dbl&gt;    &lt;dbl&gt;        &lt;dbl&gt;
+## 1 pop                 0.639    0.128        0.652
+## 2 rock                0.521    0.140        0.523
+```
+
+--
+
+**Data visualization**
+
+&lt;img src="01-Introduction_Data_files/figure-html/unnamed-chunk-4-1.png" width="65%" /&gt;
+
+---
+
+# Remarks
+
+.pull-left[
+![](01-Introduction_Data_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+It *appears* that **pop** songs tend to have *higher* measures of "danceability" compared to **rock** songs. 
+
+- Is the difference **large enough**?
+
+- Is the result **generalizable**?
+    - Is the sample *representative*?
+]
+
+---
+
+class: center, middle
+
+# Data Basics
+
+---
+
+# What is data?
+
+**Data** are any collection of numbers, characters, images, or other items that provide information about something.
+- Datasets are made up of **variables** measured on **cases**
+
+--
+
+
+```
+## # A tibble: 32,833 x 4
+##    track_name                         track_artist   playlist_genre danceability
+##    &lt;chr&gt;                              &lt;chr&gt;          &lt;chr&gt;                 &lt;dbl&gt;
+##  1 I Don't Care (with Justin Bieber)… Ed Sheeran     pop                   0.748
+##  2 Memories - Dillon Francis Remix    Maroon 5       pop                   0.726
+##  3 All the Time - Don Diablo Remix    Zara Larsson   pop                   0.675
+##  4 Call You Mine - Keanu Silva Remix  The Chainsmok… pop                   0.718
+##  5 Someone You Loved - Future Humans… Lewis Capaldi  pop                   0.65 
+##  6 Beautiful People (feat. Khalid) -… Ed Sheeran     pop                   0.675
+##  7 Never Really Over - R3HAB Remix    Katy Perry     pop                   0.449
+##  8 Post Malone (feat. RANI) - GATTÜS… Sam Feldt      pop                   0.542
+##  9 Tough Love - Tiësto Remix / Radio… Avicii         pop                   0.594
+## 10 If I Can't Have You - Gryffin Rem… Shawn Mendes   pop                   0.642
+## # … with 32,823 more rows
+```
+
+--
+
+**Cases**: individual songs
+
+--
+
+**Variables**: `track_name`, `track_artist`, `playlist_genre`, `danceability`
+
+---
+
+# Data Sources
+
+Knowing where the data come from is important!
+
+--
+
+- Many of the datasets I'll use in this class come from [TidyTuesday](https://github.com/rfordatascience/tidytuesday). 
+
+.center[
+&lt;img src="tidytuesday.png" width="605" /&gt;
+]
+
+--
+
+Most **TidyTuesday** datasets contain a *data dictionary*, so you can determine what each of the **variables** mean!
+
+---
+
+# Types of Variables: Categorical
+
+**Categorical (Qualitative) Variables**
+
+- **Nominal**: We classify individuals into categories; *no intrinsic order* to the categories.
+    - Examples: state/country, eye color, college major
+    
+--
+
+- **Ordinal**: We classify individuals into categories; categories have *a natural ordering*.
+    - Examples: class on airplane, letter grade
+    
+--
+
+Which variables in the **Spotify data** are **categorical**?
+
+
+```
+## # A tibble: 5 x 4
+##   track_name                          track_artist   playlist_genre danceability
+##   &lt;chr&gt;                               &lt;chr&gt;          &lt;chr&gt;                 &lt;dbl&gt;
+## 1 I Don't Care (with Justin Bieber) … Ed Sheeran     pop                   0.748
+## 2 Memories - Dillon Francis Remix     Maroon 5       pop                   0.726
+## 3 All the Time - Don Diablo Remix     Zara Larsson   pop                   0.675
+## 4 Call You Mine - Keanu Silva Remix   The Chainsmok… pop                   0.718
+## 5 Someone You Loved - Future Humans … Lewis Capaldi  pop                   0.65
+```
+
+---
+
+# Types of Variables: Numerical
+
+**Numerical (Quantitative) Variables**
+
+- **Discrete**: Numerical variable that can *only take whole, non-negative numbers* (0, 1, 2, ...)
+    - Examples: number of students in STAT 118, number of heads when flipping 3 coins. 
+    
+--
+
+- **Continuous**: Numerical variable that can *take an infinite range of numbers* within a (sometimes infinite) interval.     
+    - Examples: age, temperature, height, weight
+
+--
+
+Which variables in the **Spotify data** are **numerical**?
+
+
+```
+## # A tibble: 5 x 4
+##   track_name                          track_artist   playlist_genre danceability
+##   &lt;chr&gt;                               &lt;chr&gt;          &lt;chr&gt;                 &lt;dbl&gt;
+## 1 I Don't Care (with Justin Bieber) … Ed Sheeran     pop                   0.748
+## 2 Memories - Dillon Francis Remix     Maroon 5       pop                   0.726
+## 3 All the Time - Don Diablo Remix     Zara Larsson   pop                   0.675
+## 4 Call You Mine - Keanu Silva Remix   The Chainsmok… pop                   0.718
+## 5 Someone You Loved - Future Humans … Lewis Capaldi  pop                   0.65
+```
+
+---
+
+# Relationships Between Variables
+
+**Some examples...**
+
+Motivated by [TidyTuesday](https://github.com/rfordatascience/tidytuesday) data:
+
+- Are [hotel bookings](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-02-11/readme.md) with or without *children* **associated** with *month*?
+    - Two **categorical** variables
+    
+--
+
+- Is [password](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-01-14/readme.md) *strength* **associated** with *category*?
+    - One **numerical** variable, one **categorical** variable
+    
+--
+
+- Is *cholesterol* in [fast food menu items](https://github.com/rfordatascience/tidytuesday/tree/master/data/2018/2018-09-04) **associated** with *calories*?
+    - Two **numerical** variables
+    
+---
+
+# More Data!
+
+.pull-left[
+
+
+```r
+head(my_data, 10)
+```
+
+```
+## # A tibble: 10 x 2
+##        x     y
+##    &lt;dbl&gt; &lt;dbl&gt;
+##  1  55.4  97.2
+##  2  51.5  96.0
+##  3  46.2  94.5
+##  4  42.8  91.4
+##  5  40.8  88.3
+##  6  38.7  84.9
+##  7  35.6  79.9
+##  8  33.1  77.6
+##  9  29.0  74.5
+## 10  26.2  71.4
+```
+]
+
+--
+
+.pull-right[
+
+```r
+mean(~x, data = my_data)
+```
+
+```
+## [1] 54.26327
+```
+
+```r
+mean(~y, data = my_data)
+```
+
+```
+## [1] 47.83225
+```
+
+```r
+cor(x ~ y, data = my_data)
+```
+
+```
+## [1] -0.06447185
+```
+]
+
+--
+
+**Weak correlation** between *x* and *y* - what's going on?!
+
+---
+
+# More Data Visualizations
+
+The **Datasaurus Dozen**
+
+![](https://d2f99xq7vri1nk.cloudfront.net/DinoSequentialSmaller.gif)
+---
+
+# We need more than raw data!
+
+Each *x* and *y* in these graphs has the same **mean**, **standard deviation**, **variance**, and **correlation**!
+
+.center[
+&lt;img src="datasaurus_dozen.png" width="710" /&gt;
+]
+
+---
+
+# Another Example
+
+What is the association between *x* and *y*?
+
+.center[
+&lt;img src="01-Introduction_Data_files/figure-html/unnamed-chunk-14-1.png" width="65%" /&gt;
+]
+
+---
+
+# The SAME Example!
+
+**Now** what is the association between *x* and *y*?
+
+.center[
+&lt;img src="01-Introduction_Data_files/figure-html/unnamed-chunk-15-1.png" width="65%" /&gt;
+]
+
+---
+
+class: center, middle
+
+# Sampling Strategies
+
+---
+
+# Observational Studies
+
+One primary type of data collection is through an **observational study**. 
+
+- Data collected through *surveys*, *medical records*, following a *cohort* of similar individuals, etc.
+
+- Researchers merely *observe* the data. 
+
+--
+
+.center[
+&lt;img src="ekstrom_2016.png" width="60%" /&gt;
+]
+
+--
+
+**Research question**: What is the relative **safety**, in terms of *risk of cardiovascular disease*, of various treatments for type 2 diabetes?
+
+---
+
+# Sampling from a population
+
+This research question uses a **sample** to reach conclusions about a target **population**. 
+
+--
+
+**General principle**: A **sample** from a **population** is useful for learning about a population only when the sample is **representative** of the population. 
+
+- **Random** sampling is key!
+
+- How might sampling be *non-representative*?
+
+--
+
+.center[
+&lt;img src="sample_convenience.png" width="304" /&gt;
+]
+
+---
+
+# Sampling from a population
+
+This research question uses a **sample** to reach conclusions about a target **population**. 
+
+--
+
+**General principle**: A **sample** from a **population** is useful for learning about a population only when the sample is **representative** of the population. 
+
+- **Random** sampling is key!
+
+- How might sampling be *non-representative*?
+
+--
+
+.center[
+&lt;img src="sample_nonresponse.png" width="304" /&gt;
+]
+
+---
+
+# Simple Random Sampling
+
+.center[
+&lt;img src="sample_random.png" width="492" /&gt;
+]
+
+- **Note**: Not *guaranteed* to be **representative** (e.g., if most people don't respond)
+
+---
+
+# Stratified Sampling
+
+.center[
+&lt;img src="sample_stratified.png" width="493" /&gt;
+]
+
+- Population first divided into **strata**. Cases within each stratum are **similar**. 
+
+--
+
+**Example**: Sampling from health care providers in *different cities*
+
+---
+
+# Cluster Sampling
+
+.center[
+&lt;img src="sample_cluster.png" width="493" /&gt;
+]
+
+- There *might* be **variability** within clusters, but the clusters themselves are similar. 
+
+--
+
+**Example**: Sampling from neighborhoods in a city. 
+- The population within each neighborhood might be *diverse*, but overall the neighborhoods are relatively *similar*. 
+
+---
+
+# Multistage Sampling
+
+.center[
+&lt;img src="sample_multistage.png" width="493" /&gt;
+]
+
+- Similar to **cluster sampling**, except take a *simple random sample* within each cluster. 
+
+---
+
+class: center, middle
+
+# Experiments
+
+---
+
+# Chocolate Consumption and Nobel Laureates?
+
+[Source](https://www.nejm.org/doi/full/10.1056/NEJMon1211064)
+
+.center[
+&lt;img src="choc_nobel_plot.jpeg" width="393" /&gt;
+
+]
+
+- **Conclusion**: There is an **association** between chocolate intake per capita and the number of Nobel laureates in various countries.
+
+---
+
+# Three Possible Explanations
+
+- Higher chocolate intake (*x*) causes an increase in chances of winning the Nobel Prize (*y*). 
+
+.center[
+&lt;img src="x_y.png" width="63" /&gt;
+]
+
+--
+
+- Winning the Nobel Prize (*y*) causes an increase in chocolate intake (*x*). 
+
+.center[
+&lt;img src="y_x.png" width="61" /&gt;
+]
+
+--
+
+- A *third variable* is responsible for both *x* and *y*. This is called a **confounder**. 
+    - **Examples**: differences in socioeconomic status between countries, geographic and climatic factors, etc.
+
+.center[
+&lt;img src="confounder.png" width="169" /&gt;
+]
+
+--
+
+(This is **not** an experiment!)
+
+---
+
+# Experiments
+
+In **experiments** (often referred to as *randomized trials*), researchers assign *treatments* to cases in a sample.
+- Can establish a **causal connection** between the *treatment* and *outcome*
+
+--
+
+[Learning Early About Peanuts (LEAP) Study](https://www.nejm.org/doi/pdf/10.1056/NEJMoa1414850)
+
+.center[
+&lt;img src="leap_abstract.png" width="458" /&gt;
+]
+
+---
+
+# Principle 1: Control
+
+When selecting participants for a study, researchers work to **control** for extraneous variables (confounders) and choose a sample of participants that is *representative* of the population of interest. 
+
+--
+
+.center[
+&lt;img src="leap_methods1.png" width="484" /&gt;
+]
+
+**Inclusion criteria**: (1) between 4 and 11 months of age, (2) severe eczema and/or allergies to eggs
+
+---
+
+# Principle 2: Randomization
+
+**Randomly assign** patients to *treatment groups*. 
+
+- Ensures that groups are **balanced** with respect to potential confounders. 
+
+- Differences in outcome between treatment groups can be directly attributed to the *treatment*. 
+
+--
+
+.center[
+&lt;img src="leap_methods2.png" width="480" /&gt;
+]
+
+--
+
+If researchers suspect that variables *other than the treatment* may influence the response... 
+- Group into **blocks** based on said variables, and *randomize within each block*. 
+
+---
+
+# Principle 3: Replication
+
+Results from a study with a *larger number of cases* are generally more **reliable**. 
+
+- LEAP study: `\(n = 640\)`
+
+--
+
+.center[
+&lt;img src="leap_methods2.png" width="480" /&gt;
+]
+
+--
+
+**Randomized experiments** are *essential*, and are often required for a new drug or vaccine to be marketed to the public.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
