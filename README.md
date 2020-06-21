@@ -1,1 +1,1 @@
-# STAT118
+# STAT 118: Introductory Statistics
