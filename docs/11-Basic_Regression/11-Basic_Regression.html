@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Basic Linear Regression
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Visualizing .display[correlation]
+
+--
+
+## Building regression .display[models]
+    
+--
+
+## Evaluating .display[residuals]
+
+--
+
+## Working with .display[categorical] predictors
+    
+---
+
+class: center, middle, frame
+
+# Visualizing Correlation
+
+---
+
+# Penguins!
+
+Relationship between **bill length** and **bill depth**
+
+- [Source](https://github.com/allisonhorst/palmerpenguins): Palmer Station, Antarctica
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-2-1.png" width="75%" /&gt;
+]
+
+.pull-left[
+&lt;img src="palmerpenguins_hex.png" width="77" /&gt;
+]
+
+---
+
+# Bill depth?!
+
+Artwork by @allison_horst
+
+.center[
+&lt;img src="culmen_depth.png" width="1152" /&gt;
+]
+
+---
+
+# What is correlation?
+
+.pull-left[
+`$$r_{x,y}=\frac{\sum(x_{i}-\bar{x})(y_{i}-\bar{y})}{\sqrt{\sum(x_{i}-\bar{x})^{2}(y_{i}-\bar{y})^{2}}}$$`
+
+- Ranges from **-1** to **1**
+]
+
+.pull-right[
+As the value of *x* **goes up**, the value of *y* tends to **go up** (*or down*) by...
+- *a lot/a little/nothing*. 
+]
+
+--
+
+This says *nothing* about **how much** *y* changes when *x* changes!
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-5-1.png" width="75%" /&gt;
+]
+
+- `\(r=-0.229\)`
+
+---
+
+# Correlation Values
+
+.pull-left[
+&amp;nbsp;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th class="cell-left"&gt;r&lt;/th&gt;
+    &lt;th class="cell-left"&gt;Rough meaning&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-left"&gt;±0.1–0.3&amp;emsp;&lt;/td&gt;
+    &lt;td class="cell-left"&gt;Weak&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-left"&gt;±0.3–0.5&lt;/td&gt;
+    &lt;td class="cell-left"&gt;Moderate&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-left"&gt;±0.5–0.8&lt;/td&gt;
+    &lt;td class="cell-left"&gt;Strong&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-left"&gt;±0.8–0.9&lt;/td&gt;
+    &lt;td class="cell-left"&gt;Very strong&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+
+- -1 and 1 are **perfect linear correlations**
+]
+
+.pull-right[
+![](11-Basic_Regression_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# What does the correlation tell us?
+
+Strength of the **linear relationship** between *x* and *y*. 
+
+- This says *nothing* about **how much** *y* changes when *x* changes!
+
+.pull-left[
+![](11-Basic_Regression_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+![](11-Basic_Regression_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# One more thing...
+
+.center[
+## .display[Correlation is not causation!!!]
+]
+
+--
+
+**Always be aware of potential confounders!**
+
+- They could be affecting both *x* and *y*
+
+--
+
+&lt;br&gt;
+
+An "example":
+
+- *Number of people who drowned by falling into a pool* vs **Films in which Nicolas Cage appeared** (*r* = 0.67)
+
+.pull-left[
+&lt;img src="cage.jpg" width="192" /&gt;
+
+]
+
+.pull-right[
+There's a book!
+
+- [Spurious Correlations by Tyler Vigen](https://www.tylervigen.com/spurious-correlations)
+]
+
+---
+
+class: center, middle, frame
+
+# Building (Linear) Regression Models
+
+---
+
+# The Linear Model
+
+- The equation of the **line of best fit** through the data
+
+.center[
+
+`\(\widehat{bill\ depth}=20.9-0.085*(bill\ length)\)`
+
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-10-1.png" width="75%" /&gt;
+]
+
+**Question**: What is the *association* between bill length (*x*) and bill depth (*y*)?
+
+---
+
+# What is a model?
+
+A **representation** of some structure
+
+- Typically on a *smaller scale* than the original
+
+.center[
+&lt;img src="model_airplane.jpg" width="320" /&gt;
+]
+
+In Statistics, a **model** is a summary and simplification of data that help our understanding.
+
+---
+
+# A Good Quote
+
+.pull-left[
+*All models are wrong, but some are useful*. 
+- George Box, famous statistician
+]
+
+.pull-right[
+&lt;img src="box.jpg" width="328" /&gt;
+]
+
+---
+
+# Linear Model Components
+
+$$
+\hat{y} = \beta_0 + \beta_1 x_1 
+$$
+
+.pull-left[
+
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-center"&gt;\(\hat{y}\)&lt;/td&gt;
+    &lt;td class="cell-left"&gt;&amp;ensp;(Predicted) Outcome variable&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-center"&gt;\(x_1\)&lt;/td&gt;
+    &lt;td class="cell-left"&gt;&amp;ensp;Explanatory variable&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-center"&gt;\(\beta_1\)&lt;/td&gt;
+    &lt;td class="cell-left"&gt;&amp;ensp;Slope&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td class="cell-center"&gt;\(\beta_0\)&lt;/td&gt;
+    &lt;td class="cell-left"&gt;&amp;ensp;y-intercept&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+
+]
+
+.pull-right[
+![](11-Basic_Regression_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+`\(\widehat{bill\ depth}=20.9-0.085*(bill\ length)\)`
+]
+
+---
+
+# Slopes and Intercepts
+
+.pull-left[
+
+$$
+y = 4x - 2
+$$
+
+&lt;img src="11-Basic_Regression_files/figure-html/simple-line-1-1.png" width="100%" /&gt;
+]
+
+.pull-right[
+
+$$
+y = -0.5x + 5
+$$
+
+&lt;img src="11-Basic_Regression_files/figure-html/simple-line-2-1.png" width="100%" /&gt;
+]
+
+`\(y=mx+b\)`
+
+- *y*: a number
+- *x*: a number
+- *m*: **slope**
+- *b*: **y-intercept**
+
+---
+
+# Building Linear Models in R
+
+`lm()`: Stands for **L**inear **M**odel
+
+
+```r
+model_name = lm(y ~ x, data = data_name)
+summary(model_name) # See model details
+```
+
+--
+
+&lt;br&gt;
+
+
+```r
+library(moderndive)
+get_regression_table(model_name) # View model results in nicer table
+```
+
+---
+
+# Penguin Model
+
+
+```r
+penguin_model = lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+get_regression_table(penguin_model)
+```
+
+```
+## # A tibble: 2 x 7
+##   term           estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept        20.9       0.844     24.7        0   19.2     22.5  
+## 2 bill_length_mm   -0.085     0.019     -4.46       0   -0.123   -0.048
+```
+
+&lt;br&gt;
+
+`$$\widehat{bill\ depth}=20.9-0.085(bill\ length)$$`
+
+
+---
+
+# Template for Single X
+
+.center[
+## A one unit increase in X is *associated* with&lt;br&gt;a β&lt;sub&gt;1&lt;/sub&gt; increase (or decrease) in Y, on average.
+]
+
+--
+
+.pull-left[
+`$$\widehat{bill\ depth}=20.9-0.085(bill\ length)$$`
+
+- It's the equation of a **straight line**!
+]
+
+.pull-right[
+![](11-Basic_Regression_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Calculating Regression Coefficients
+
+While we use R to calculate `\(\beta_{1}\)` and `\(\beta_{0}\)`, these are functions of the **data**!
+
+- `\(\beta_{1}=(s_{y}/s_{x})*r\)`
+
+- `\(\beta_{0}=\bar{y}-\beta_{1}*\bar{x}\)`
+
+--
+
+Each of these formulas contain statistics that can be greatly affected by **outliers**. 
+
+- Be wary of outliers when building regression models!
+
+--
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-18-1.png" width="75%" /&gt;
+]
+
+
+---
+
+class: center, middle, frame
+
+# Evaluating Residuals
+
+---
+
+# Is a straight line appropriate?
+
+**All models will be wrong!** But is this one *useful*?
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-19-1.png" width="75%" /&gt;
+]
+
+---
+
+# Residuals
+
+leftover *variation* in data after accounting for model fit
+
+- `\(e_{i}=y_{i}-\hat{y}_{i}\)`
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-20-1.png" width="75%" /&gt;
+]
+
+**In R**:
+
+
+```r
+get_regression_points(penguin_model)
+```
+
+---
+
+# Residuals
+
+leftover *variation* in data after accounting for model fit
+
+- `\(e_{i}=y_{i}-\hat{y}_{i}\)`
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-22-1.png" width="75%" /&gt;
+]
+
+--
+
+Ideally, the residuals will be *as small as possible*. 
+
+- **Also**: Their *variability* will be relatively constant as *x* increases. 
+
+---
+
+# Residual Plot
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-23-1.png" width="75%" /&gt;
+]
+
+*Ideally*, this plot will look **boring**. 
+
+- Can you see any patterns?
+
+---
+
+class: center, middle, frame
+
+# Working with Categorical Predictors
+
+---
+
+# Categorical X
+
+Relationship between **sex of penguin** and **bill depth**
+
+- [Source](https://github.com/allisonhorst/palmerpenguins): Palmer Station, Antarctica
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-24-1.png" width="75%" /&gt;
+]
+
+---
+
+# Interpreting Coefficients
+
+.center[
+&lt;img src="11-Basic_Regression_files/figure-html/unnamed-chunk-25-1.png" width="65%" /&gt;
+]
+
+
+```r
+penguin_model_cat = lm(bill_depth_mm ~ sex, data = penguins)
+get_regression_table(penguin_model_cat)
+```
+
+```
+## # A tibble: 2 x 7
+##   term      estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept    16.4      0.142    115.         0    16.1     16.7 
+## 2 sexmale       1.47     0.201      7.31       0     1.07     1.86
+```
+
+- `\(\widehat{bill\ depth}=16.4+1.47(sex_{male})\)`
+
+---
+
+# Indicator Variables
+
+We converted the categorical variable (`sex`) to *numerical* (0/1) using an **indicator variable**: `$$sex_{male} = \begin{cases}0,&amp;\text{if female}\\ 1,&amp;\text{if male}\end{cases}$$`
+
+--
+
+.pull-left[
+![](11-Basic_Regression_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+
+`\(\widehat{bill\ depth}=16.4+1.47(sex_{male})\)`
+
+- **slope**, `\(\beta_{1}\)`: Average change in the Y between the two categories
+
+- **intercept**, `\(\beta_{0}\)`: Estimated value of Y for the *first* category (with indicator of 0)
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

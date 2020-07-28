@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Multiple Regression
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Modeling .display[multiple] variables
+
+--
+
+## .display[Categorical] predictors
+    
+--
+
+## .display[Building] multiple regression models
+
+--
+
+## .display[Interpreting] multiple regression models
+    
+---
+
+class: center, middle, frame
+
+# Modeling Multiple Variables
+
+---
+
+# Basic vs Multiple Regression
+
+.pull-left[
+**Basic regression**
+
+- *two* variables: *y* and *x*
+
+- describes relationship between an **outcome** and a *single* **predictor** variable
+
+- `\(\hat{y}=\beta_{0}+\beta_{1}x_{1}\)`
+
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+**Multiple regression**
+
+- *many* variables: *y*, `\(x_{1}\)`, `\(x_{2}\)`, ...
+
+- describes relationship between an **outcome** and a *multiple* **predictor** variables
+
+- `\(\hat{y}=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\cdots\)`
+
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Penguins!
+
+Relationship between **bill length** and **bill depth**
+
+- [Source](https://github.com/allisonhorst/palmerpenguins): Palmer Station, Antarctica
+
+.center[
+&lt;img src="12-Multiple_Regression_files/figure-html/unnamed-chunk-4-1.png" width="75%" /&gt;
+]
+
+.pull-left[
+&lt;img src="palmerpenguins_hex.png" width="77" /&gt;
+]
+
+---
+
+# More than two variables
+
+.pull-left[
+&lt;img src="penguins.png" width="576" /&gt;
+]
+
+.pull-right[
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+]
+
+.footnote[
+[*] Artwork by @allison_horst
+]
+
+---
+
+# Why multiple regression?
+
+It is **rare** to have a *single* predictor (*x*) variable in a study!
+
+- The **multiple regression model** is of the form: `$$\hat{y}=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}+\cdots+\beta_{k}x_{k}$$` where there are *k* predictor variables in the study. 
+
+--
+
+.pull-left[
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+**Multiple regression model** 
+
+- for *bill depth*: `$$\begin{aligned}\widehat{bill\ depth}=&amp;\beta_{0}+\beta_{1}(bill\ length)\\&amp;+\beta_{2}(species)\end{aligned}$$`
+]
+
+---
+
+class: center, middle, frame
+
+# Categorical Predictors 
+
+## (with more than two levels)
+
+---
+
+# Reviewing Indicators
+
+.pull-left[
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+
+`\(\widehat{bill\ depth}=16.4+1.47(sex_{male})\)`
+
+- **slope**, `\(\beta_{1}\)`: Average change in the Y between the two categories
+
+- **intercept**, `\(\beta_{0}\)`: Estimated value of Y for the *first* category (with indicator of 0)
+]
+
+---
+
+# Categorical Predictors (with more than two levels)
+
+Suppose instead we fit a model with `species`, which has **three levels**. `$$\widehat{bill\ depth}=\beta_{0}+\beta_{1}(species)$$`
+
+.center[
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Model Fitting in R
+
+`\(\widehat{bill\ depth}=\beta_{0}+\beta_{1}(species)\)`
+
+
+```r
+species_model = lm(bill_depth_mm ~ species, data = penguins)
+library(moderndive)
+get_regression_table(species_model)
+```
+
+```
+## # A tibble: 3 x 7
+##   term             estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept          18.3       0.091   201.       0      18.2     18.5  
+## 2 speciesChinstrap    0.074     0.164     0.453    0.65   -0.248    0.396
+## 3 speciesGentoo      -3.36      0.136   -24.7      0      -3.63    -3.10
+```
+
+--
+
+Write the model like this: `$$\widehat{bill\ depth}=18.3+0.0742(species_{chinstrap})-3.36(species_{gentoo})$$`
+
+--
+
+What happened to Adelie penguins?
+
+- This is the **reference level**. Coefficients listed for other species are *relative to Adelie penguins*. 
+
+---
+
+class: center, middle, frame
+
+# Building Multiple Regression Models
+
+---
+
+# Multiple Predictors
+
+Now let's build a **multiple regression model**: `$$\widehat{bill\ depth}=\beta_{0}+\beta_{1}(bill\ length)+\beta_{2}(species)$$`
+
+--
+
+
+```r
+multiple_model = lm(bill_depth_mm ~ bill_length_mm + species, 
+                    data = penguins)
+get_regression_table(multiple_model)
+```
+
+```
+## # A tibble: 4 x 7
+##   term             estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept           10.6      0.683     15.5        0    9.25    11.9  
+## 2 bill_length_mm       0.2      0.017     11.4        0    0.165    0.234
+## 3 speciesChinstrap    -1.93     0.224     -8.62       0   -2.37    -1.49 
+## 4 speciesGentoo       -5.11     0.191    -26.7        0   -5.48    -4.73
+```
+
+--
+
+$$
+`\begin{aligned}
+\widehat{bill\ depth}=&amp;\ 10.6+0.2(bill\ length) \\
+&amp;-1.93(species_{chinstrap})-5.11(species_{gentoo})
+\end{aligned}`
+$$
+---
+
+# Adding More Variables
+
+Are any other variables *associated* with Penguin bill depth?
+
+- How about **flipper length**?
+
+--
+
+.center[
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Adding More Variables
+
+`$$\widehat{bill\ depth}=\beta_{0}+\beta_{1}(bill\ length)+\beta_{2}(flipper\ length)+\beta_{3}(species)$$`
+
+
+```r
+multiple_model = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm + species, 
+                    data = penguins)
+get_regression_table(multiple_model)
+```
+
+```
+## # A tibble: 5 x 7
+##   term              estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept            3.01      1.41       2.14   0.033    0.238    5.79 
+## 2 bill_length_mm       0.144     0.019      7.60   0        0.107    0.182
+## 3 flipper_length_mm    0.051     0.008      6.05   0        0.035    0.068
+## 4 speciesChinstrap    -1.68      0.217     -7.71   0       -2.10    -1.25 
+## 5 speciesGentoo       -6.02      0.236    -25.5    0       -6.48    -5.55
+```
+
+$$
+`\begin{aligned}
+\widehat{bill\ depth}=&amp;\ 3.01+0.144(bill\ length) + 0.051(flipper\ length) \\
+&amp;-1.68(species_{chinstrap})-6.02(species_{gentoo})
+\end{aligned}`
+$$
+---
+
+class: center, middle, frame
+
+# Interpreting Multiple Regression Models
+
+---
+
+# Sliders and Switches
+
+.center[
+&lt;img src="sliders_switches.png" width="615" /&gt;
+]
+
+.footnote[
+[*] Slider/Switch example by @andrewheiss
+]
+
+---
+
+# Template for Numerical Variables
+
+.center[
+## *Holding everything else constant*, a one unit increase in X is *associated* with &lt;br&gt;a β&lt;sub&gt;i&lt;/sub&gt; increase (or decrease) in Y, on average.
+]
+
+$$
+`\begin{aligned}
+\widehat{bill\ depth}=&amp;\ 3.01+0.144(bill\ length) + 0.0512(flipper\ length) \\
+&amp;-1.68(species_{chinstrap})-6.02(species_{gentoo})
+\end{aligned}`
+$$
+--
+
+&lt;br&gt;
+
+- **Holding everything else constant**, a one *mm* increase in bill length is *associated* with a **0.144** *mm* increase in bill depth, *on average*. 
+
+---
+
+# Template for Categorical Variables
+
+.center[
+## *Holding everything else constant*, Y is &lt;br&gt;β&lt;sub&gt;i&lt;/sub&gt; units larger (or smaller) in X&lt;sub&gt;group i&lt;/sub&gt; compared to X&lt;sub&gt;reference&lt;/sub&gt;, on average.
+]
+
+$$
+`\begin{aligned}
+\widehat{bill\ depth}=&amp;\ 3.01+0.144(bill\ length) + 0.0512(flipper\ length) \\
+&amp;-1.68(species_{chinstrap})-6.02(species_{gentoo})
+\end{aligned}`
+$$
+--
+
+&lt;br&gt;
+
+- **Holding everything else constant**, Chinstrap penguins have bills with 1.68 *less* depth than *Adelie* penguins, *on average*. 
+
+---
+
+# Prediction
+
+Suppose we want to **predict** the *bill depth* of a penguin with the following characteristics:
+
+- **bill length** of 50*mm*
+- **flipper length** of 196*mm*
+- Chinstrap **species**
+
+**Prediction** works similarly to *basic regression*. We just plug these values into the linear model!
+
+--
+
+$$
+`\begin{aligned}
+\widehat{bill\ depth}=&amp;\ 3.01+0.144(bill\ length) + 0.0512(flipper\ length) \\
+&amp;-1.68(species_{chinstrap})-6.02(species_{gentoo})
+\end{aligned}`
+$$
+
+```r
+3.01 + 0.144*(50) + 0.0512*(196) - 1.68*(1)
+```
+
+```
+## [1] 18.5652
+```
+
+--
+
+The linear model *predicts* that this penguin has a bill depth of 18.6*mm*. 
+
+---
+
+# Residuals
+
+**But**...
+
+.center[
+&lt;img src="penguin_data.png" width="515" /&gt;
+]
+
+--
+
+Recall the **residual**: `\(e_{i}=y_{i}-\hat{y}_{i}\)`. 
+
+- This penguin has a residual of `\(19.5-18.6=0.9\)`*mm*
+
+---
+
+# Concluding Thoughts
+
+**Linear regression models** are one of the *most widely-used* modeling techniques. 
+
+.pull-left[
+A model doesn't have to be a **straight line**!
+
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+
+All models are **wrong**!
+
+![](12-Multiple_Regression_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

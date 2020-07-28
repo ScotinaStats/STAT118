@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Topics in Regression
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## .display[Inference] for linear regression
+
+--
+
+## Model .display[Selection]
+    
+--
+
+## Checking model conditions using .display[graphs] 
+
+---
+
+class: center, middle, frame
+
+# Inference for Linear Regression
+
+---
+
+# Point Estimates
+
+.pull-left[
+**What we've seen**
+
+- `\(\bar{x}\)` (sample mean)
+
+- `\(\hat{p}\)` (sample proportion)
+
+- `\(\bar{x}_{1}-\bar{x}_{2}\)`
+
+- `\(\hat{p}_{1}-\hat{p}_{2}\)`
+
+These *all* are estimated from *samples*. 
+
+- some amount of **uncertainty** attached
+]
+
+--
+
+.pull-right[
+**What else?**
+
+- `\(\hat{y}=\beta_{0}+\beta_{1}x_{1}\)`
+
+- `\(\hat{y}=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}\)`
+
+The `\(\beta\)` values are *also* **point estimates**!!!
+]
+
+---
+
+# Uncertainty in Regression
+
+.pull-left[
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+`\(\widehat{bill\ depth}=20.9-0.085(bill\ length)\)`
+]
+
+.pull-right[
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+$$
+`\begin{aligned}
+\widehat{bill\ depth}=&amp;\ 10.6+0.2(bill\ length)\\&amp;-1.9(species_{chinstrap})\\&amp;-5.1(species_{gentoo})
+\end{aligned}`
+$$
+]
+
+---
+
+# Hypotheses in Regression
+
+.center[
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+]
+ 
+`\(\beta_{1}\)` is **negative**. But this is only an **estimate**!
+
+- Does the *true* linear model have a negative slope?
+
+---
+
+# Hypotheses in Regression
+
+.center[
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+]
+
+- `\(H_{0}: \beta_{1}=0\)` (The *true* model has slope zero)
+
+- `\(H_{A}: \beta_{1}\neq0\)` (Bill length is **predictive** of bill depth)
+
+---
+
+# Regression R Output
+
+
+```r
+penguin_model = lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+get_regression_table(penguin_model)
+```
+
+```
+## # A tibble: 2 x 7
+##   term           estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept        20.9       0.844     24.7        0   19.2     22.5  
+## 2 bill_length_mm   -0.085     0.019     -4.46       0   -0.123   -0.048
+```
+
+**Estimate**: `\(\beta_{1}=-0.085\)`
+
+--
+
+- This has some measure of *uncertainty* attached, in the form of a **standard error**
+    - `\(SE(\beta_{1})=0.0191\)`
+    
+---
+
+# Regression R Output
+
+
+```r
+penguin_model = lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+get_regression_table(penguin_model)
+```
+
+```
+## # A tibble: 2 x 7
+##   term           estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept        20.9       0.844     24.7        0   19.2     22.5  
+## 2 bill_length_mm   -0.085     0.019     -4.46       0   -0.123   -0.048
+```
+
+The `statistic` column is the **test statistic**: `$$T=\frac{\text{estimate}-\text{null value}}{SE}=\frac{-0.085-0}{0.0191}=-4.46$$`
+
+--
+
+**p-value** `\(&lt;0.05\)`: Reject `\(H_{0}\)` and conclude that *bill length* is **predictive** of *bill depth*. 
+
+---
+
+# What's better than a point estimate?
+
+.center[
+&lt;img src="13-Regression_Topics_files/figure-html/unnamed-chunk-8-1.png" width="60%" /&gt;
+]
+
+--
+
+.pull-left[
+&lt;img src="upgrade.jpeg" width="140" /&gt;
+]
+
+.center[
+&lt;img src="13-Regression_Topics_files/figure-html/unnamed-chunk-10-1.png" width="60%" /&gt;
+]
+
+---
+
+# Confidence Intervals (in R)
+
+There are a few ways, but CIs are already included in `get_regression_table()`:
+
+
+```r
+get_regression_table(penguin_model)
+```
+
+```
+## # A tibble: 2 x 7
+##   term           estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;             &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept        20.9       0.844     24.7        0   19.2     22.5  
+## 2 bill_length_mm   -0.085     0.019     -4.46       0   -0.123   -0.048
+```
+
+--
+
+&lt;br&gt;
+
+**Interpretation**: We are **95% confident** that with each *mm* increase in a penguin's bill length, the bill depth will decrease by **between 0.048 and 0.122** *mm*, on average. 
+
+--
+
+&lt;br&gt;
+
+Does this interval include **zero**?
+
+- Connect back to **hypothesis testing**!
+
+---
+
+# CIs in Multiple Regression
+
+
+```r
+multiple_model = lm(bill_depth_mm ~ bill_length_mm + species, 
+                    data = penguins)
+get_regression_table(multiple_model)
+```
+
+```
+## # A tibble: 4 x 7
+##   term             estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;               &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept           10.6      0.683     15.5        0    9.25    11.9  
+## 2 bill_length_mm       0.2      0.017     11.4        0    0.165    0.234
+## 3 speciesChinstrap    -1.93     0.224     -8.62       0   -2.37    -1.49 
+## 4 speciesGentoo       -5.11     0.191    -26.7        0   -5.48    -4.73
+```
+
+---
+
+class: center, middle, frame
+
+# Model Selection
+
+---
+
+# Data Modeling
+
+Two purposes for modeling:
+
+1. **Modeling for prediction**: You want to *predict* the outcome variable `\(y\)` based on information contained in the predictor variable(s).
+    - *Example*: Disney+ trying to predict the next movie you'll watch
+
+2. **Modeling for explanation**: You want to describe the *relationship* between the outcome variable `\(y\)` and the explanatory/predictor variable(s). 
+    - *Example*: Disney+ trying to see the effect of time of day on movie selection
+
+--
+
+Either way, your model will be **wrong**! 😅
+
+- But they can still be *useful*. 
+
+---
+
+# Model Pruning
+
+Sometimes including *unimportant variables* in the model can have a negative impact on prediction. 
+
+&lt;br&gt;
+
+**Full Model**:
+
+
+```r
+full_model = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm + 
+                  body_mass_g +  species + sex + island, data = penguins)
+get_regression_table(full_model)
+```
+
+```
+## # A tibble: 9 x 7
+##   term              estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept           11.0       1.48      7.41    0        8.06    13.9  
+## 2 bill_length_mm       0.038     0.02      1.94    0.053    0        0.077
+## 3 flipper_length_mm    0.019     0.008     2.24    0.026    0.002    0.035
+## 4 body_mass_g          0.001     0         3.41    0.001    0        0.001
+## 5 speciesChinstrap    -0.334     0.246    -1.36    0.176   -0.819    0.15 
+## 6 speciesGentoo       -4.96      0.3     -16.5     0       -5.55    -4.37 
+## 7 sexmale              0.893     0.136     6.55    0        0.625    1.16 
+## 8 islandDream         -0.138     0.161    -0.858   0.392   -0.455    0.179
+## 9 islandTorgersen      0.037     0.168     0.219   0.827   -0.294    0.367
+```
+
+---
+
+
+# Using p-values
+
+If we want to understand which variables are **statistically significant** predictors of the outcome, then we can "prune" the model based on **p-values**. 
+
+
+```r
+good_model = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm +
+                  body_mass_g +  species + sex, data = penguins)
+get_regression_table(good_model)
+```
+
+```
+## # A tibble: 7 x 7
+##   term              estimate std_error statistic p_value lower_ci upper_ci
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 intercept           10.8       1.47       7.35   0        7.93    13.7  
+## 2 bill_length_mm       0.04      0.02       2.03   0.043    0.001    0.079
+## 3 flipper_length_mm    0.019     0.008      2.30   0.022    0.003    0.035
+## 4 body_mass_g          0.001     0          3.40   0.001    0        0.001
+## 5 speciesChinstrap    -0.45      0.225     -1.99   0.047   -0.893   -0.006
+## 6 speciesGentoo       -4.94      0.277    -17.8    0       -5.48    -4.39 
+## 7 sexmale              0.886     0.136      6.50   0        0.618    1.15
+```
+
+--
+
+**Note**: Sometimes, the only goal might be to improve *prediction accuracy*. 
+
+- In that case, the "best" model might look different!
+
+---
+
+# Backward Elimination
+
+We can *automate* the model selection process by using **backward elimination**. 
+
+- Start with the **full model**, including *all* potential predictor variables. 
+
+- Variables are eliminated *one-at-a-time* until each **p-value** is less than 0.05.
+
+--
+
+**In R**:
+
+
+```r
+library(olsrr)
+ols_step_backward_p(full_model)
+```
+
+```
+## 
+## 
+##                           Elimination Summary                            
+## ------------------------------------------------------------------------
+##         Variable                  Adj.                                      
+## Step    Removed     R-Square    R-Square     C(p)       AIC        RMSE     
+## ------------------------------------------------------------------------
+##    1    island        0.8411      0.8382    4.3863    798.7600    0.7922    
+## ------------------------------------------------------------------------
+```
+
+---
+
+# Forward Selection
+
+We could also start in the *opposite direction*, and build the model up from the **null model** with *no predictors*.
+
+--
+
+**In R**:
+
+
+```r
+ols_step_forward_p(full_model)
+```
+
+```
+## 
+##                                  Selection Summary                                   
+## ------------------------------------------------------------------------------------
+##         Variable                           Adj.                                         
+## Step         Entered         R-Square    R-Square      C(p)         AIC        RMSE     
+## ------------------------------------------------------------------------------------
+##    1    species                0.6798      0.6779    339.3883    1053.5604    1.1208    
+##    2    sex                    0.8228      0.8212     35.9397     829.1315    0.8328    
+##    3    body_mass_g            0.8355      0.8335     11.7928     806.2336    0.8035    
+##    4    flipper_length_mm      0.8391      0.8366      6.5061     800.9498    0.7959    
+##    5    bill_length_mm         0.8411      0.8382      4.3863     798.7600    0.7922    
+## ------------------------------------------------------------------------------------
+```
+
+--
+
+$$
+`\begin{aligned}
+  \widehat{bill\ depth}=&amp;\ 10.8 + 0.04(bill\ length) + 0.019(flipper\ length) \\
+  &amp;+0.001(body\ mass)-0.45(species_{chinstrap}) -4.94(species_{gentoo})\\
+  &amp;+0.886(sex)
+\end{aligned}`
+$$
+
+---
+
+# R-Squared
+
+The `\(R^{2}\)` value is another *diagnostic* tool used in model selection. 
+
+- Measures the amount of *variability* in the outcome (*y*) variable that was explained by the overall model fit. 
+
+- Ranges from 0 to 1
+
+--
+
+**In R**:
+
+
+```r
+ols_step_forward_p(full_model)
+```
+
+```
+## 
+##                                  Selection Summary                                   
+## ------------------------------------------------------------------------------------
+##         Variable                           Adj.                                         
+## Step         Entered         R-Square    R-Square      C(p)         AIC        RMSE     
+## ------------------------------------------------------------------------------------
+##    1    species                0.6798      0.6779    339.3883    1053.5604    1.1208    
+##    2    sex                    0.8228      0.8212     35.9397     829.1315    0.8328    
+##    3    body_mass_g            0.8355      0.8335     11.7928     806.2336    0.8035    
+##    4    flipper_length_mm      0.8391      0.8366      6.5061     800.9498    0.7959    
+##    5    bill_length_mm         0.8411      0.8382      4.3863     798.7600    0.7922    
+## ------------------------------------------------------------------------------------
+```
+
+- 84.1% of the variability in *bill depth* can be explained by the model. 
+
+---
+
+class: center, middle, frame
+
+# Checking Model Conditions using Graphs
+
+---
+
+# Four Conditions
+
+**Multiple regression models** depend on *four conditions*:
+
+1. Residuals are **nearly Normal**
+
+2. Variability of residuals is **nearly constant**
+
+3. The residuals are **independent**
+
+4. Each predictor is **linearly related** to the outcome
+
+--
+
+We can examine these conditions **graphically**!
+
+---
+
+# Exploratory Data Analysis
+
+.pull-left[
+
+```r
+gf_point(bill_depth_mm ~ body_mass_g, 
+         data = penguins)
+```
+
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+gf_point(bill_depth_mm ~ body_mass_g, 
+         color = ~species,
+         data = penguins)
+```
+
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Histogram of Residuals
+
+To check for **Normal distribution** and *outliers*
+
+
+```r
+library(moderndive)
+penguin_residuals = get_regression_points(good_model)
+
+gf_histogram( ~ residual, data = penguin_residuals) + 
+  labs(x = "Residuals")
+```
+
+&lt;img src="13-Regression_Topics_files/figure-html/unnamed-chunk-20-1.png" width="95%" /&gt;
+
+---
+
+# Residual Scatterplot
+
+Check for **constant variability** in residuals by plotting the **fitted (predicted) values**, `\(\hat{y}\)`, against the residuals:
+
+
+```r
+gf_point(residual ~ bill_depth_mm_hat, data = penguin_residuals) + 
+  labs(x = "Fitted Value", y = "Residuals")
+```
+
+&lt;img src="13-Regression_Topics_files/figure-html/unnamed-chunk-21-1.png" width="85%" /&gt;
+
+---
+
+# Residuals vs Each Predictor
+
+You could also use *each separate predictor* as the *x* variable in the plot:
+
+.pull-left[
+
+```r
+gf_point(residual ~ body_mass_g, 
+         data = penguin_residuals)
+```
+
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+
+```r
+gf_boxplot(residual ~ species, 
+           data = penguin_residuals)
+```
+
+![](13-Regression_Topics_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

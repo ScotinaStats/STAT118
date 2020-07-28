@@ -1,0 +1,655 @@
+---
+title: "STAT 118: Introductory Statistics"
+subtitle: "Basic Linear Regression"
+author: "Anthony Scotina"
+date: 
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: my-theme.css
+    nature:
+      countIncrementalSlides: false
+      highlightLines: true
+---
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+mono_accent(base_color = "#bf67bc") #3E8A83?
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(mosaic)
+library(moderndive)
+library(nycflights13)
+library(openintro)
+library(palmerpenguins)
+library(moderndive)
+library(broom)
+set.seed(12)
+data(COL)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300)
+
+theme_set(theme_minimal() +
+  theme(axis.title.x = element_text(size = 14, face = "bold"), 
+        axis.title.y = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12, face = "bold"), 
+        axis.text.y = element_text(size = 12, face = "bold")))
+```
+
+<!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+-->
+
+class: center, middle, frame
+
+# Module Plan
+
+## Visualizing .display[correlation]
+
+--
+
+## Building regression .display[models]
+    
+--
+
+## Evaluating .display[residuals]
+
+--
+
+## Working with .display[categorical] predictors
+    
+---
+
+class: center, middle, frame
+
+# Visualizing Correlation
+
+---
+
+# Penguins!
+
+Relationship between **bill length** and **bill depth**
+
+- [Source](https://github.com/allisonhorst/palmerpenguins): Palmer Station, Antarctica
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+.pull-left[
+```{r, echo = FALSE}
+knitr::include_graphics("palmerpenguins_hex.png")
+```
+]
+
+---
+
+# Bill depth?!
+
+Artwork by @allison_horst
+
+.center[
+```{r, echo = FALSE}
+knitr::include_graphics("culmen_depth.png")
+```
+]
+
+---
+
+# What is correlation?
+
+.pull-left[
+$$r_{x,y}=\frac{\sum(x_{i}-\bar{x})(y_{i}-\bar{y})}{\sqrt{\sum(x_{i}-\bar{x})^{2}(y_{i}-\bar{y})^{2}}}$$
+
+- Ranges from **-1** to **1**
+]
+
+.pull-right[
+As the value of *x* **goes up**, the value of *y* tends to **go up** (*or down*) by...
+- *a lot/a little/nothing*. 
+]
+
+--
+
+This says *nothing* about **how much** *y* changes when *x* changes!
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+- $r=-0.229$
+
+---
+
+# Correlation Values
+
+.pull-left[
+&nbsp;
+<table>
+  <tr>
+    <th class="cell-left">r</th>
+    <th class="cell-left">Rough meaning</th>
+  </tr>
+  <tr>
+    <td class="cell-left">±0.1–0.3&emsp;</td>
+    <td class="cell-left">Weak</td>
+  </tr>
+  <tr>
+    <td class="cell-left">±0.3–0.5</td>
+    <td class="cell-left">Moderate</td>
+  </tr>
+  <tr>
+    <td class="cell-left">±0.5–0.8</td>
+    <td class="cell-left">Strong</td>
+  </tr>
+  <tr>
+    <td class="cell-left">±0.8–0.9</td>
+    <td class="cell-left">Very strong</td>
+  </tr>
+</table>
+
+- -1 and 1 are **perfect linear correlations**
+]
+
+.pull-right[
+```{r, echo = FALSE, fig.dim = c(4.8, 4.2)}
+make_correlated_data <- function(r, n = 200) {
+  MASS::mvrnorm(n = n, 
+                mu = c(0, 0), 
+                Sigma = matrix(c(1, r, r, 1), nrow = 2), 
+                empirical = TRUE) %>% 
+    magrittr::set_colnames(c("x", "y")) %>% 
+    as_tibble()
+}
+cor_grid <- tibble(r = c(-0.2, 0.4, -0.75, 0.9)) %>% 
+  mutate(data = map(r, make_correlated_data)) %>% 
+  unnest(data)
+ggplot(cor_grid, aes(x = x, y = y)) +
+  geom_point(size = 2, color = "white", fill = "black", pch = 21) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(vars(r), labeller = label_both) +
+  theme(strip.text = element_text(face = "bold", size = rel(1.3), hjust = 0))
+```
+]
+
+---
+
+# What does the correlation tell us?
+
+Strength of the **linear relationship** between *x* and *y*. 
+
+- This says *nothing* about **how much** *y* changes when *x* changes!
+
+.pull-left[
+```{r, echo = FALSE}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+--
+
+.pull-right[
+```{r, echo = FALSE}
+gf_point(bill_depth_mm ~ bill_length_mm, color = ~species, data = penguins) + 
+  geom_smooth(aes(color = species), method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)", color = "Penguin species") 
+```
+]
+
+---
+
+# One more thing...
+
+.center[
+## .display[Correlation is not causation!!!]
+]
+
+--
+
+**Always be aware of potential confounders!**
+
+- They could be affecting both *x* and *y*
+
+--
+
+<br>
+
+An "example":
+
+- *Number of people who drowned by falling into a pool* vs **Films in which Nicolas Cage appeared** (*r* = 0.67)
+
+.pull-left[
+```{r, echo = FALSE}
+knitr::include_graphics("cage.jpg")
+```
+
+]
+
+.pull-right[
+There's a book!
+
+- [Spurious Correlations by Tyler Vigen](https://www.tylervigen.com/spurious-correlations)
+]
+
+---
+
+class: center, middle, frame
+
+# Building (Linear) Regression Models
+
+---
+
+# The Linear Model
+
+- The equation of the **line of best fit** through the data
+
+.center[
+
+$\widehat{bill\ depth}=20.9-0.085*(bill\ length)$
+
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+**Question**: What is the *association* between bill length (*x*) and bill depth (*y*)?
+
+---
+
+# What is a model?
+
+A **representation** of some structure
+
+- Typically on a *smaller scale* than the original
+
+.center[
+```{r, echo = FALSE}
+knitr::include_graphics("model_airplane.jpg")
+```
+]
+
+In Statistics, a **model** is a summary and simplification of data that help our understanding.
+
+---
+
+# A Good Quote
+
+.pull-left[
+*All models are wrong, but some are useful*. 
+- George Box, famous statistician
+]
+
+.pull-right[
+```{r, echo = FALSE}
+knitr::include_graphics("box.jpg")
+```
+]
+
+---
+
+# Linear Model Components
+
+$$
+\hat{y} = \beta_0 + \beta_1 x_1 
+$$
+
+.pull-left[
+
+<table>
+  <tr>
+    <td class="cell-center">\(\hat{y}\)</td>
+    <td class="cell-left">&ensp;(Predicted) Outcome variable</td>
+  </tr>
+  <tr>
+    <td class="cell-center">\(x_1\)</td>
+    <td class="cell-left">&ensp;Explanatory variable</td>
+  </tr>
+  <tr>
+    <td class="cell-center">\(\beta_1\)</td>
+    <td class="cell-left">&ensp;Slope</td>
+  </tr>
+  <tr>
+    <td class="cell-center">\(\beta_0\)</td>
+    <td class="cell-left">&ensp;y-intercept</td>
+  </tr>
+</table>
+
+]
+
+.pull-right[
+```{r, echo = FALSE}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+
+$\widehat{bill\ depth}=20.9-0.085*(bill\ length)$
+]
+
+---
+
+# Slopes and Intercepts
+
+.pull-left[
+
+$$
+y = 4x - 2
+$$
+
+```{r simple-line-1, echo=FALSE, fig.dim=c(4.8, 3.5), out.width="100%"}
+ggplot(data = tibble(x = 0:5), aes(x = x)) +
+  stat_function(fun = function(x) 4 * x - 2, 
+                color = "blue", size = 1.5) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  scale_x_continuous(breaks = 0:5) +
+  scale_y_continuous(breaks = -2:9, limits = c(-2, 9)) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+]
+
+.pull-right[
+
+$$
+y = -0.5x + 5
+$$
+
+```{r simple-line-2, echo=FALSE, fig.dim=c(4.8, 3.5), out.width="100%"}
+ggplot(data = tibble(x = 0:14), aes(x = x)) +
+  stat_function(fun = function(x) -0.5 * x + 5, 
+                color = "maroon", size = 1.5) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  scale_x_continuous(breaks = 0:14) +
+  scale_y_continuous(breaks = -1:7, limits = c(-1, 7)) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank())
+```
+]
+
+$y=mx+b$
+
+- *y*: a number
+- *x*: a number
+- *m*: **slope**
+- *b*: **y-intercept**
+
+---
+
+# Building Linear Models in R
+
+`lm()`: Stands for **L**inear **M**odel
+
+```{r, eval = FALSE}
+model_name = lm(y ~ x, data = data_name)
+summary(model_name) # See model details
+```
+
+--
+
+<br>
+
+```{r, eval = FALSE}
+library(moderndive)
+get_regression_table(model_name) # View model results in nicer table
+```
+
+---
+
+# Penguin Model
+
+```{r}
+penguin_model = lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+get_regression_table(penguin_model)
+```
+
+<br>
+
+$$\widehat{bill\ depth}=20.9-0.085(bill\ length)$$
+
+
+---
+
+# Template for Single X
+
+.center[
+## A one unit increase in X is *associated* with<br>a β<sub>1</sub> increase (or decrease) in Y, on average.
+]
+
+--
+
+.pull-left[
+$$\widehat{bill\ depth}=20.9-0.085(bill\ length)$$
+
+- It's the equation of a **straight line**!
+]
+
+.pull-right[
+```{r, echo = FALSE}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+---
+
+# Calculating Regression Coefficients
+
+While we use R to calculate $\beta_{1}$ and $\beta_{0}$, these are functions of the **data**!
+
+- $\beta_{1}=(s_{y}/s_{x})*r$
+
+- $\beta_{0}=\bar{y}-\beta_{1}*\bar{x}$
+
+--
+
+Each of these formulas contain statistics that can be greatly affected by **outliers**. 
+
+- Be wary of outliers when building regression models!
+
+--
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+set.seed(12)
+cor_grid_outlier = cor_grid %>%
+  filter(r == 0.90) %>%
+  sample_n(15)
+cor_grid_outlier[10, 1] = 0.9; cor_grid_outlier[10, 2] = -2; cor_grid_outlier[10, 3] = 5
+cor_grid_outlier[12, 1] = 0.9; cor_grid_outlier[12, 2] = -1.5; cor_grid_outlier[12, 3] = 6
+cor_grid_outlier[14, 1] = 0.9; cor_grid_outlier[14, 2] = -1.25; cor_grid_outlier[14, 3] = 8
+ggplot(cor_grid_outlier, aes(x = x, y = y)) +
+  geom_point(size = 2, color = "white", fill = "black", pch = 21) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme(strip.text = element_text(face = "bold", size = rel(1.3), hjust = 0))
+```
+]
+
+
+---
+
+class: center, middle, frame
+
+# Evaluating Residuals
+
+---
+
+# Is a straight line appropriate?
+
+**All models will be wrong!** But is this one *useful*?
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+---
+
+# Residuals
+
+leftover *variation* in data after accounting for model fit
+
+- $e_{i}=y_{i}-\hat{y}_{i}$
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+penguin_model <- lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+penguin_fitted <- broom::augment(penguin_model)
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") +
+  geom_segment(data = penguin_fitted, 
+               aes(x = bill_length_mm, xend = bill_length_mm,
+                   y = bill_depth_mm, yend = .fitted), 
+               color = "gray50", lty = 2)
+```
+]
+
+**In R**:
+
+```{r, eval = FALSE}
+get_regression_points(penguin_model)
+```
+
+---
+
+# Residuals
+
+leftover *variation* in data after accounting for model fit
+
+- $e_{i}=y_{i}-\hat{y}_{i}$
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+set.seed(12)
+penguins_small = penguins %>% sample_n(30)
+penguin_smodel <- lm(bill_depth_mm ~ bill_length_mm, data = penguins_small)
+penguin_sfitted <- broom::augment(penguin_smodel)
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins_small) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") + 
+  geom_segment(data = penguin_sfitted, 
+               aes(x = bill_length_mm, xend = bill_length_mm,
+                   y = bill_depth_mm, yend = .fitted), 
+               color = "gray50", lty = 2)
+
+```
+]
+
+--
+
+Ideally, the residuals will be *as small as possible*. 
+
+- **Also**: Their *variability* will be relatively constant as *x* increases. 
+
+---
+
+# Residual Plot
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+gf_point(.resid ~ bill_length_mm, data = penguin_sfitted) + 
+  geom_hline(yintercept = 0, color = "blue") +
+  labs(x = "Bill length (mm)", y = "Residuals (y - y_hat)") 
+```
+]
+
+*Ideally*, this plot will look **boring**. 
+
+- Can you see any patterns?
+
+---
+
+class: center, middle, frame
+
+# Working with Categorical Predictors
+
+---
+
+# Categorical X
+
+Relationship between **sex of penguin** and **bill depth**
+
+- [Source](https://github.com/allisonhorst/palmerpenguins): Palmer Station, Antarctica
+
+.center[
+```{r, echo = FALSE, out.width = "75%", fig.asp = 0.5}
+penguins %>% 
+  na.omit() %>%
+  ggplot(aes(x = sex, y = bill_depth_mm)) + 
+  geom_point() + 
+  labs(x = "Sex of penguin", y = "Bill depth (mm)")
+```
+]
+
+---
+
+# Interpreting Coefficients
+
+.center[
+```{r, echo = FALSE, out.width = "65%", fig.asp = 0.5}
+penguins %>% 
+  na.omit() %>%
+  mutate(sex_ind = ifelse(sex == "female", 0, 1)) %>%
+  ggplot(aes(x = sex_ind, y = bill_depth_mm)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("0 (female)", "1 (male)")) +
+  labs(x = "Sex of penguin", y = "Bill depth (mm)") 
+```
+]
+
+```{r}
+penguin_model_cat = lm(bill_depth_mm ~ sex, data = penguins)
+get_regression_table(penguin_model_cat)
+```
+
+- $\widehat{bill\ depth}=16.4+1.47(sex_{male})$
+
+---
+
+# Indicator Variables
+
+We converted the categorical variable (`sex`) to *numerical* (0/1) using an **indicator variable**: $$sex_{male} = \begin{cases}0,&\text{if female}\\ 1,&\text{if male}\end{cases}$$
+
+--
+
+.pull-left[
+```{r, echo = FALSE}
+penguins %>% 
+  na.omit() %>%
+  mutate(sex_ind = ifelse(sex == "female", 0, 1)) %>%
+  ggplot(aes(x = sex_ind, y = bill_depth_mm)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = c(0, 1), labels = c("0 (female)", "1 (male)")) +
+  labs(x = "Sex of penguin", y = "Bill depth (mm)")
+```
+]
+
+.pull-right[
+
+$\widehat{bill\ depth}=16.4+1.47(sex_{male})$
+
+- **slope**, $\beta_{1}$: Average change in the Y between the two categories
+
+- **intercept**, $\beta_{0}$: Estimated value of Y for the *first* category (with indicator of 0)
+]

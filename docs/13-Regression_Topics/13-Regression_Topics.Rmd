@@ -1,0 +1,482 @@
+---
+title: "STAT 118: Introductory Statistics"
+subtitle: "Topics in Regression"
+author: "Anthony Scotina"
+date: 
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: my-theme.css
+    nature:
+      countIncrementalSlides: false
+      highlightLines: true
+---
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+mono_accent(base_color = "#bf67bc") #3E8A83?
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(mosaic)
+library(moderndive)
+library(nycflights13)
+library(openintro)
+library(palmerpenguins)
+library(broom)
+library(olsrr)
+set.seed(12)
+data(COL)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300)
+
+theme_set(theme_minimal() +
+  theme(axis.title.x = element_text(size = 14, face = "bold"), 
+        axis.title.y = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12, face = "bold"), 
+        axis.text.y = element_text(size = 12, face = "bold")))
+```
+
+<!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+-->
+
+class: center, middle, frame
+
+# Module Plan
+
+## .display[Inference] for linear regression
+
+--
+
+## Model .display[Selection]
+    
+--
+
+## Checking model conditions using .display[graphs] 
+
+---
+
+class: center, middle, frame
+
+# Inference for Linear Regression
+
+---
+
+# Point Estimates
+
+.pull-left[
+**What we've seen**
+
+- $\bar{x}$ (sample mean)
+
+- $\hat{p}$ (sample proportion)
+
+- $\bar{x}_{1}-\bar{x}_{2}$
+
+- $\hat{p}_{1}-\hat{p}_{2}$
+
+These *all* are estimated from *samples*. 
+
+- some amount of **uncertainty** attached
+]
+
+--
+
+.pull-right[
+**What else?**
+
+- $\hat{y}=\beta_{0}+\beta_{1}x_{1}$
+
+- $\hat{y}=\beta_{0}+\beta_{1}x_{1}+\beta_{2}x_{2}$
+
+The $\beta$ values are *also* **point estimates**!!!
+]
+
+---
+
+# Uncertainty in Regression
+
+.pull-left[
+```{r, echo = FALSE}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+
+$\widehat{bill\ depth}=20.9-0.085(bill\ length)$
+]
+
+.pull-right[
+```{r, echo = FALSE}
+gf_point(bill_depth_mm ~ bill_length_mm, color = ~species, data = penguins) + 
+  geom_smooth(aes(color = species), method = "lm", se = FALSE) +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)", color = "Penguin species") 
+```
+
+$$
+\begin{aligned}
+\widehat{bill\ depth}=&\ 10.6+0.2(bill\ length)\\&-1.9(species_{chinstrap})\\&-5.1(species_{gentoo})
+\end{aligned}
+$$
+]
+
+---
+
+# Hypotheses in Regression
+
+.center[
+```{r, echo = FALSE, fig.asp = 0.5}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm") +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+ 
+$\beta_{1}$ is **negative**. But this is only an **estimate**!
+
+- Does the *true* linear model have a negative slope?
+
+---
+
+# Hypotheses in Regression
+
+.center[
+```{r, echo = FALSE, fig.asp = 0.5}
+gf_point(bill_depth_mm ~ bill_length_mm, data = penguins) + 
+  geom_smooth(method = "lm") +
+  labs(x = "Bill length (mm)", y = "Bill depth (mm)") 
+```
+]
+
+- $H_{0}: \beta_{1}=0$ (The *true* model has slope zero)
+
+- $H_{A}: \beta_{1}\neq0$ (Bill length is **predictive** of bill depth)
+
+---
+
+# Regression R Output
+
+```{r}
+penguin_model = lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+get_regression_table(penguin_model)
+```
+
+**Estimate**: $\beta_{1}=-0.085$
+
+--
+
+- This has some measure of *uncertainty* attached, in the form of a **standard error**
+    - $SE(\beta_{1})=0.0191$
+    
+---
+
+# Regression R Output
+
+```{r}
+penguin_model = lm(bill_depth_mm ~ bill_length_mm, data = penguins)
+get_regression_table(penguin_model)
+```
+
+The `statistic` column is the **test statistic**: $$T=\frac{\text{estimate}-\text{null value}}{SE}=\frac{-0.085-0}{0.0191}=-4.46$$
+
+--
+
+**p-value** $<0.05$: Reject $H_{0}$ and conclude that *bill length* is **predictive** of *bill depth*. 
+
+---
+
+# What's better than a point estimate?
+
+.center[
+```{r, echo = FALSE, fig.width = 5, fig.asp = .32, out.width = "60%"}
+data.frame(range = seq(-1, 1, 0.01)) %>%
+  ggplot(aes(x = range)) + 
+  geom_blank() + 
+  annotate("point", x = -0.085, y = 0.25, size = 3) + 
+  scale_x_continuous(limits = c(-0.15, 0.05)) +
+  theme_minimal() + 
+  labs(x = expression(beta[1]), y = "", title = "Point Estimate") + 
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.x = element_text(size = 12, face = "bold"))
+```
+]
+
+--
+
+.pull-left[
+```{r, echo = FALSE, dpi = 200}
+knitr::include_graphics("upgrade.jpeg")
+```
+]
+
+.center[
+```{r, echo = FALSE, fig.width = 5, fig.asp = .32, out.width = "60%"}
+data.frame(range = seq(-1, 1, 0.01)) %>%
+  ggplot(aes(x = range)) + 
+  geom_blank() + 
+  annotate("point", x = -0.085, y = 0.25, size = 3) + 
+  geom_segment(y = 0.25, yend = 0.25, 
+               x = -0.123, xend = -0.0475, 
+               color = "red", lty = 2) +
+  scale_x_continuous(limits = c(-0.15, 0.05)) +
+  
+  theme_minimal() + 
+  labs(x = expression(beta[1]), y = "", title = "Point Estimate (with 95% CI)") + 
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.x = element_text(size = 12, face = "bold"))
+```
+]
+
+---
+
+# Confidence Intervals (in R)
+
+There are a few ways, but CIs are already included in `get_regression_table()`:
+
+```{r}
+get_regression_table(penguin_model)
+```
+
+--
+
+<br>
+
+**Interpretation**: We are **95% confident** that with each *mm* increase in a penguin's bill length, the bill depth will decrease by **between 0.048 and 0.122** *mm*, on average. 
+
+--
+
+<br>
+
+Does this interval include **zero**?
+
+- Connect back to **hypothesis testing**!
+
+---
+
+# CIs in Multiple Regression
+
+```{r}
+multiple_model = lm(bill_depth_mm ~ bill_length_mm + species, 
+                    data = penguins)
+get_regression_table(multiple_model)
+```
+
+---
+
+class: center, middle, frame
+
+# Model Selection
+
+---
+
+# Data Modeling
+
+Two purposes for modeling:
+
+1. **Modeling for prediction**: You want to *predict* the outcome variable $y$ based on information contained in the predictor variable(s).
+    - *Example*: Disney+ trying to predict the next movie you'll watch
+
+2. **Modeling for explanation**: You want to describe the *relationship* between the outcome variable $y$ and the explanatory/predictor variable(s). 
+    - *Example*: Disney+ trying to see the effect of time of day on movie selection
+
+--
+
+Either way, your model will be **wrong**! 😅
+
+- But they can still be *useful*. 
+
+---
+
+# Model Pruning
+
+Sometimes including *unimportant variables* in the model can have a negative impact on prediction. 
+
+<br>
+
+**Full Model**:
+
+```{r}
+full_model = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm + 
+                  body_mass_g +  species + sex + island, data = penguins)
+get_regression_table(full_model)
+```
+
+---
+
+
+# Using p-values
+
+If we want to understand which variables are **statistically significant** predictors of the outcome, then we can "prune" the model based on **p-values**. 
+
+```{r}
+good_model = lm(bill_depth_mm ~ bill_length_mm + flipper_length_mm +
+                  body_mass_g +  species + sex, data = penguins)
+get_regression_table(good_model)
+```
+
+--
+
+**Note**: Sometimes, the only goal might be to improve *prediction accuracy*. 
+
+- In that case, the "best" model might look different!
+
+---
+
+# Backward Elimination
+
+We can *automate* the model selection process by using **backward elimination**. 
+
+- Start with the **full model**, including *all* potential predictor variables. 
+
+- Variables are eliminated *one-at-a-time* until each **p-value** is less than 0.05.
+
+--
+
+**In R**:
+
+```{r, warning = FALSE, message = FALSE}
+library(olsrr)
+ols_step_backward_p(full_model)
+```
+
+---
+
+# Forward Selection
+
+We could also start in the *opposite direction*, and build the model up from the **null model** with *no predictors*.
+
+--
+
+**In R**:
+
+```{r}
+ols_step_forward_p(full_model)
+```
+
+--
+
+$$
+\begin{aligned}
+  \widehat{bill\ depth}=&\ 10.8 + 0.04(bill\ length) + 0.019(flipper\ length) \\
+  &+0.001(body\ mass)-0.45(species_{chinstrap}) -4.94(species_{gentoo})\\
+  &+0.886(sex)
+\end{aligned}
+$$
+
+---
+
+# R-Squared
+
+The $R^{2}$ value is another *diagnostic* tool used in model selection. 
+
+- Measures the amount of *variability* in the outcome (*y*) variable that was explained by the overall model fit. 
+
+- Ranges from 0 to 1
+
+--
+
+**In R**:
+
+```{r}
+ols_step_forward_p(full_model)
+```
+
+- 84.1% of the variability in *bill depth* can be explained by the model. 
+
+---
+
+class: center, middle, frame
+
+# Checking Model Conditions using Graphs
+
+---
+
+# Four Conditions
+
+**Multiple regression models** depend on *four conditions*:
+
+1. Residuals are **nearly Normal**
+
+2. Variability of residuals is **nearly constant**
+
+3. The residuals are **independent**
+
+4. Each predictor is **linearly related** to the outcome
+
+--
+
+We can examine these conditions **graphically**!
+
+---
+
+# Exploratory Data Analysis
+
+.pull-left[
+```{r}
+gf_point(bill_depth_mm ~ body_mass_g, 
+         data = penguins)
+```
+]
+
+--
+
+.pull-right[
+```{r}
+gf_point(bill_depth_mm ~ body_mass_g, 
+         color = ~species,
+         data = penguins)
+```
+]
+
+---
+
+# Histogram of Residuals
+
+To check for **Normal distribution** and *outliers*
+
+```{r, fig.asp = 0.5, out.width = "95%"}
+library(moderndive)
+penguin_residuals = get_regression_points(good_model)
+
+gf_histogram( ~ residual, data = penguin_residuals) + 
+  labs(x = "Residuals")
+```
+
+---
+
+# Residual Scatterplot
+
+Check for **constant variability** in residuals by plotting the **fitted (predicted) values**, $\hat{y}$, against the residuals:
+
+```{r, fig.asp = 0.5, out.width = "85%"}
+gf_point(residual ~ bill_depth_mm_hat, data = penguin_residuals) + 
+  labs(x = "Fitted Value", y = "Residuals")
+```
+
+---
+
+# Residuals vs Each Predictor
+
+You could also use *each separate predictor* as the *x* variable in the plot:
+
+.pull-left[
+```{r}
+gf_point(residual ~ body_mass_g, 
+         data = penguin_residuals)
+```
+]
+
+--
+
+.pull-right[
+```{r}
+gf_boxplot(residual ~ species, 
+           data = penguin_residuals)
+```
+]
