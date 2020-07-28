@@ -1,0 +1,642 @@
+---
+title: "STAT 118: Introductory Statistics"
+subtitle: "Inference for Numerical Data (One Group)"
+author: "Anthony Scotina"
+date: 
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: my-theme.css
+    nature:
+      countIncrementalSlides: false
+      highlightLines: true
+---
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+mono_accent(base_color = "#bf67bc") #3E8A83?
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(mosaic)
+library(moderndive)
+library(nycflights13)
+library(openintro)
+set.seed(12)
+data(COL)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300)
+
+airbnb_boston <- read_csv("~/Dropbox/Teaching/03-Simmons Courses/STAT118-Introductory Statistics [ONLINE]/Data/airbnb_boston.csv")
+airbnb_boston = airbnb_boston %>%
+  filter(room_type != "Hotel room")
+
+theme_set(theme_bw() +
+  theme(axis.title.x = element_text(size = 14, face = "bold"), 
+        axis.title.y = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12, face = "bold"), 
+        axis.text.y = element_text(size = 12, face = "bold")))
+```
+
+<!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+-->
+
+class: center, middle, frame
+
+# Module Plan
+
+## Central Limit Theorem .display[for means]
+    
+--
+
+## The .display[t-distribution]
+
+--
+
+## Hypothesis testing for .display[single mean]
+    
+---
+
+class: center, middle, frame
+
+# Central Limit Theorem (for means)
+
+---
+
+# Boston Airbnb Data
+
+```{r}
+airbnb_boston
+```
+
+- Sample of $n=2980$ Boston Airbnbs
+
+We are interested in estimating the **average price per night** of Airbnbs in *major US cities*.
+
+---
+
+# Exploratory Data Analysis
+
+.pull-left[
+```{r}
+gf_histogram( ~ price, 
+              data = airbnb_boston)
+```
+
+- **right-skewed**
+- **typical** prices per night are ~150
+
+]
+
+--
+
+.pull-right[
+```{r, comment = ""}
+favstats( ~ price, 
+          data = airbnb_boston)
+```
+
+- $\bar{x}=163.52$ (**sample mean**)
+
+- $s=140.83$ (**sample standard deviation**)
+]
+
+---
+
+# Sampling Variability
+
+In our *single sample* of Airbnbs, 
+
+- $\bar{x}=163.52$, $s=140.83$
+
+--
+
+**Central Limit Theorem**: When we collect a *sufficiently large* sample of $n$ *independent* observations, the **sampling distribution** of $\bar{x}$ is Normal with:
+- $\mu_{\bar{x}}=\mu$ (*unknown* population mean)
+- $\sigma_{\bar{x}}=\sigma/\sqrt{n}$
+
+--
+
+.center[
+```{r, echo = FALSE, fig.height = 4, out.width = "65%"}
+set.seed(12)
+samp = data.frame(var = rnorm(10000))
+gf_density( ~ var, data = samp) + 
+  geom_histogram(binwidth = 0.2, alpha = 0.3, fill = "blue") + 
+  labs(x = expression(bar(x)), y = "",
+       title = "Sampling Distribution", subtitle = "(Sample Mean)") + 
+  scale_x_continuous(labels = c("", "", expression(mu), "", "")) +
+  theme(axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank())
+```
+]
+
+---
+
+# CLT Conditions
+
+Two conditions for using the CLT with $\bar{x}$
+
+**Independence**: The sampled observations are independent. 
+
+- Satisfied if the sample is **random**
+
+    - Is this condition satisfied for the Airbnb data?
+
+--
+
+**Normality**: *IF the sample is small*, the sample observations must come from a *Normal population*. 
+
+- $n<30$: If there are *no clear outliers*, we **assume** the data are sampled from a *nearly Normal* distribution. 
+
+- $n\geq30$: If there are no **extreme outliers**, we assume that the sampling distribution of $\bar{x}$ is nearly Normal. 
+    
+---
+
+# Standard Error
+
+The **standard error** describes how much estimated variability one can expect in the *sample statistic*. 
+
+.center[
+```{r, echo = FALSE, fig.width = 5, fig.asp = .32, out.width = "60%"}
+data.frame(range = seq(0, 200, 1)) %>%
+  ggplot(aes(x = range)) + 
+  geom_blank() + 
+  annotate("point", x = 163.52, y = 0.25, size = 3) + 
+  geom_segment(y = 0.25, yend = 0.25, 
+               x = 158.4617, xend = 168.5783, 
+               color = "red", lty = 2) + 
+  scale_x_continuous(labels = scales::dollar, limits = c(150, 175)) +
+  theme_minimal() + 
+  labs(x = "", y = "", title = "95% Confidence Interval") + 
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.x = element_text(size = 12, face = "bold"))
+```
+]
+
+--
+
+The **standard deviation** of $\bar{x}$ is given by $SD(\bar{x})=\sigma/\sqrt{n}$. 
+
+- We *estimate* this with the **standard error**: $$SE_{\bar{x}}=\frac{s}{\sqrt{n}}=\frac{140.83}{\sqrt{2980}}=2.58$$
+
+--
+
+```{r}
+140.83/sqrt(2980)
+```
+
+---
+
+class: center, middle, frame
+
+# The t-distribution
+
+---
+
+# The t-distribution
+
+.center[
+```{r, echo = FALSE, fig.asp = .52, out.width = "65%"}
+plot(c(-5, 5),
+     c(0, dnorm(0)),
+     type = 'n',
+     axes = FALSE, xlab = "", ylab = "")
+axis(1, seq(-6, 6, 2))
+abline(h = 0)
+
+xleg <- 2
+yleg <- 0.35
+yleg.line.offset <- -0.07
+line.leg.width <- 0.55
+
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg + yleg.line.offset, 2),
+    col = COL[1], lty = 1, lwd = 1.8)
+text(xleg + line.leg.width, yleg + yleg.line.offset,
+    "t-distribution",
+    col = COL[1], pos = 4)
+
+X <- seq(-6, 6, 0.01)
+
+Y <- dt(X, 2)
+lines(X, Y, lwd = 1.8, col = COL[1])
+
+```
+]
+
+--
+
+.center[
+```{r, echo = FALSE, fig.asp = .52, out.width = "65%"}
+plot(c(-5, 5),
+     c(0, dnorm(0)),
+     type = 'n',
+     axes = FALSE, xlab = "", ylab = "")
+axis(1, seq(-6, 6, 2))
+abline(h = 0)
+
+xleg <- 2
+yleg <- 0.35
+yleg.line.offset <- -0.07
+line.leg.width <- 0.55
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg, 2),
+    col = COL[4], lty = 3, lwd = 2.5)
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg + yleg.line.offset, 2),
+    col = COL[1], lty = 1, lwd = 1.8)
+text(xleg + line.leg.width, yleg,
+    "Standard Normal",
+    col = COL[4], pos = 4)
+text(xleg + line.leg.width, yleg + yleg.line.offset,
+    "t-distribution",
+    col = COL[1], pos = 4)
+
+X <- seq(-6, 6, 0.01)
+Y <- dnorm(X)
+lines(X, Y, lty = 3, lwd = 2.5, col = COL[4])
+
+Y <- dt(X, 2)
+lines(X, Y, lwd = 1.8, col = COL[1])
+
+```
+]
+
+---
+
+# The t-distribution
+
+.center[
+```{r, echo = FALSE, fig.asp = .52, out.width = "65%"}
+plot(c(-5, 5),
+     c(0, dnorm(0)),
+     type = 'n',
+     axes = FALSE, xlab = "", ylab = "")
+axis(1, seq(-6, 6, 2))
+abline(h = 0)
+
+xleg <- 2
+yleg <- 0.35
+yleg.line.offset <- -0.07
+line.leg.width <- 0.55
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg, 2),
+    col = COL[4], lty = 3, lwd = 2.5)
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg + yleg.line.offset, 2),
+    col = COL[1], lty = 1, lwd = 1.8)
+text(xleg + line.leg.width, yleg,
+    "Standard Normal",
+    col = COL[4], pos = 4)
+text(xleg + line.leg.width, yleg + yleg.line.offset,
+    "t-distribution",
+    col = COL[1], pos = 4)
+
+X <- seq(-6, 6, 0.01)
+Y <- dnorm(X)
+lines(X, Y, lty = 3, lwd = 2.5, col = COL[4])
+
+Y <- dt(X, 2)
+lines(X, Y, lwd = 1.8, col = COL[1])
+
+```
+]
+
+- **Always** centered at *zero*
+
+- One parameter controls the *form* of the bell-shape: the **degrees of freedom** (*df*)
+    - *df* $=n-1$
+    
+---
+
+# Degrees of Freedom (df)
+
+*df* $=n-1$
+
+- The *larger the sample*, the **larger the df**. 
+
+--
+
+.center[
+```{r, echo = FALSE, fig.asp = .52, out.width = "75%"}
+plot(c(-5, 5),
+     c(0, dnorm(0)),
+     type = 'n',
+     axes = FALSE, xlab = "", ylab = "")
+at <- seq(-10, 10, 2)
+axis(1, at)
+axis(1, at - 1, rep("", length(at)), tcl = -0.1)
+abline(h = 0)
+
+COL. <- fadeColor(COL[1], c("FF", "89", "68", "4C", "33"))
+COLt <- fadeColor(COL[1], c("FF", "AA", "85", "60", "45"))
+DF   <- c('Normal', 8, 4, 2, 1)
+
+X <- seq(-10, 10, 0.02)
+Y <- dnorm(X)
+lines(X, Y, col = COL.[1])
+
+for (i in 2:5) {
+  Y <- dt(X, as.numeric(DF[i]))
+  lines(X, Y, col = COL.[i], lwd = 1.5)
+}
+
+legend(2.5, 0.4,
+       legend = c(DF[1],
+       paste('t, df = ', DF[2:5], sep = '')),
+       col = COL.,
+       text.col = COLt,
+       lty = rep(1, 5),
+       lwd = 1.5)
+```
+]
+
+--
+
+In the Airbnb example, $n=2980$, so *df* $=2979$. 
+
+---
+
+# Confidence Intervals using t-distribution
+
+Define $\mu$ as the **population mean** of Airbnb price per night. 
+
+- This is *unknown*, but $\bar{x}=163.52$ serves as a **point estimate**. 
+
+--
+
+A **confidence interval** represents a *range of plausible values* for $\mu$. 
+
+Using the **t-distribution**:
+
+- $\bar{x}\pm t^{*}_{df}\times SE_{\bar{x}}$
+
+--
+
+The $t^{*}_{df}$ value depends on the **confidence level** AND the *df*. 
+
+.center[
+```{r, echo = FALSE, fig.height = 3, out.width = "75%"}
+par(mar = c(3.3, 1, 0.15, 1), mgp = c(2.1, 0.6, 0))
+normTail(M = c(-1.96, 1.96),
+         df = 2979,
+         col = COL[1],
+         xlim = 3.3 * c(-1, 1),
+         ylim = c(0, 0.59),
+         xlab="t-distribution, df = 2979")
+X <- rev(seq(-4, 4, 0.025))
+Y <- dt(X, 10) # makes better visual
+
+yMax <- 0.41
+
+lines(1.96*c(-1,1), rep(yMax,2), lwd=2)
+lines(rep(-1.96,2), c(0,yMax), lty=2, col=COL[6])
+lines(rep( 1.96,2), c(0,yMax), lty=2, col=COL[6])
+text(0, yMax, '95%, extends -1.96 to 1.96', pos=3)
+```
+]
+
+---
+
+# Confidence Intervals using t-distribution
+
+Define $\mu$ as the **population mean** of Airbnb price per night. 
+
+- This is *unknown*, but $\bar{x}=163.52$ serves as a **point estimate**. 
+
+A **confidence interval** represents a *range of plausible values* for $\mu$. 
+
+Using the **t-distribution**:
+
+- $\bar{x}\pm t^{*}_{df}\times SE_{\bar{x}}$
+
+The $t^{*}_{df}$ value depends on the **confidence level** AND the *df*. 
+
+.center[
+```{r, echo = FALSE, fig.height = 3, out.width = "75%"}
+par(mar = c(3.3, 1, 0.15, 1), mgp = c(2.1, 0.6, 0))
+normTail(M = c(-2.144787, 2.144787),
+         df = 14,
+         col = COL[1],
+         xlim = 3.3 * c(-1, 1),
+         ylim = c(0, 0.59),
+         xlab="t-distribution, df = 14")
+X <- rev(seq(-4, 4, 0.025))
+Y <- dt(X, 10) # makes better visual
+
+yMax <- 0.41
+
+lines(2.144787*c(-1,1), rep(yMax,2), lwd=2)
+lines(rep(-2.144787,2), c(0,yMax), lty=2, col=COL[6])
+lines(rep( 2.144787,2), c(0,yMax), lty=2, col=COL[6])
+text(0, yMax, '95%, extends -2.145 to 2.145', pos=3)
+```
+]
+
+---
+
+# qt()
+
+We'll use `qt()` to find $t_{df}$ distribution *quantiles*.
+- Works similarly to `qnorm()`. 
+
+.pull-left[
+```{r}
+val = 1 - (1-0.95)/2 # For 95% CI
+qt(val, df = 2979) 
+```
+
+```{r}
+val = 1 - (1-0.95)/2 # For 95% CI
+qt(val, df = 14)
+```
+]
+
+--
+
+.pull-right[
+```{r}
+qnorm(val)
+```
+
+```{r}
+qt(val, 
+   df = c(5, 50, 250, 250000))
+```
+]
+
+---
+
+# 95% Confidence Intervals
+
+**Airbnb example**
+
+- $SE_{\bar{x}}=s/\sqrt{n}=140.83/\sqrt{2980}=2.58$
+
+- $\bar{x}\pm t^{*}_{df}\times SE_{\bar{x}} \longrightarrow 163.52\pm1.96\times2.58$
+
+```{r}
+c(163.52 - 1.96*2.58, 163.52 + 1.96*2.58)
+```
+
+--
+
+**Interpretation**: We are **95% confident** that the *average* price per night of Airbnbs in *major US cities* is between 	&#36;158.46 and &#36;168.58. 
+
+.center[
+```{r, echo = FALSE, fig.width = 5, fig.asp = .32, out.width = "60%"}
+data.frame(range = seq(0, 200, 1)) %>%
+  ggplot(aes(x = range)) + 
+  geom_blank() + 
+  annotate("point", x = 163.52, y = 0.25, size = 3) + 
+  geom_segment(y = 0.25, yend = 0.25, 
+               x = 158.4617, xend = 168.5783, 
+               color = "red", lty = 2) + 
+  scale_x_continuous(labels = scales::dollar, limits = c(150, 175)) +
+  theme_minimal() + 
+  labs(x = "", y = "", title = "95% Confidence Interval") + 
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.x = element_text(size = 12, face = "bold"))
+```
+]
+
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing (for single mean)
+
+---
+
+# Do you get enough sleep
+
+[According to the NIH](https://www.nhlbi.nih.gov/files/docs/public/sleep/healthysleepfs.pdf), most adults require *~7.5 hours of sleep* each night. 
+
+--
+
+```{r, echo = FALSE}
+set.seed(12)
+sleep_samp = data.frame(hours = rnorm(25, mean = 6.3, sd = 2.3))
+```
+
+In a survey of 25 randomly selected college students...
+
+```{r}
+favstats( ~ hours, data = sleep_samp)
+```
+
+- $\bar{x}=5.866766$ hours, $s=2.193591$ hours
+
+--
+
+<br>
+
+**Question**: Do the data provide sufficient *evidence* that college students generally sleep for *fewer* hours than recommended?
+
+---
+
+# Exploratory Data Analysis
+
+```{r, out.width = "45%"}
+gf_histogram(~ hours, binwidth = 1, data = sleep_samp)
+```
+
+- **unimodal**
+- *no major outliers*
+
+---
+
+# Competing Hypotheses
+
+Define $\mu$ as the **population mean** hours of sleep per night. 
+
+- $H_{0}$ (**Null hypothesis**): $\mu = 7.5$
+
+- $H_{A}$ (**Alternative hypothesis**): $\mu < 7.5$
+
+--
+
+We'll play the role of the **skeptic**. Assume $H_{0}$ until there is *convincing evidence* that it is false. 
+
+- Calculate the **test statistic**, and see how that "evidence" appears *in a world where the null is true*. 
+
+---
+
+# Test Statistic
+
+Similar to hypothesis tests for **proportions**!
+
+- **Proportions**: $$Z=\frac{\text{point estimate} - \text{null value}}{SE_{\hat{p}}}$$
+
+--
+
+- **Means**: $$T=\frac{\text{point estimate} - \text{null value}}{SE_{\bar{x}}}$$
+    - $SE_{\bar{x}}=s/\sqrt{n}$
+    
+--
+
+```{r}
+T = (5.866766 - 7.5)/(2.193591/sqrt(25))
+T
+```
+
+---
+
+# Null Distribution
+
+.center[
+```{r, echo = FALSE, fig.height = 4, out.width = "65%"}
+samp = data.frame(var = rt(10000, df = 24))
+gf_density( ~ var, data = samp) + 
+  geom_histogram(binwidth = 0.2, alpha = 0.3, fill = "blue") + 
+  geom_vline(xintercept = -3.64, color = "red") + 
+  labs(x = "T",
+       y = "",
+       title = "Null Distribution", 
+       subtitle = "t-distribution with 24 degrees of freedom") + 
+  theme(axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank())
+```
+]
+
+- **p-value**: The probability of observing data *more extreme than yours*, **in a world where the null hypothesis is true**
+
+--
+
+Calculate **tail areas** in the *t*-distribution with `pt()`:
+```{r}
+pt(-3.72274, df = 24)
+```
+
+---
+
+# t.test
+
+These *hypothesis tests for a single mean* commonly go by a different name:
+- **One-sample t-test**
+
+--
+
+**In R**:
+
+```{r}
+t.test( ~ hours, alternative = "less", mu = 7.5, 
+        data = sleep_samp)
+```
+
+--
+
+**Conclusion**: p-value $<0.05$, *reject the null*. We have evidence to suggest that students sleep for fewer hours per night than the recommended amount, on average. 
+

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Inference for Numerical Data (Two Groups)
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Confidence intervals for .display[two means]
+    
+--
+
+## Hypothesis testing for .display[two means]
+    
+---
+
+class: center, middle, frame
+
+# Comparing Groups (again)
+
+---
+
+# Jam Session
+
+[Spotify data](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-01-21/readme.md)
+
+- A *sample* of 10,458 songs from Spotify
+
+- Songs categorized as either **rock** or **pop**
+
+
+```
+## # A tibble: 10,458 x 3
+##    track_artist     playlist_genre danceability
+##    &lt;chr&gt;            &lt;chr&gt;                 &lt;dbl&gt;
+##  1 Ed Sheeran       pop                   0.748
+##  2 Maroon 5         pop                   0.726
+##  3 Zara Larsson     pop                   0.675
+##  4 The Chainsmokers pop                   0.718
+##  5 Lewis Capaldi    pop                   0.65 
+##  6 Ed Sheeran       pop                   0.675
+##  7 Katy Perry       pop                   0.449
+##  8 Sam Feldt        pop                   0.542
+##  9 Avicii           pop                   0.594
+## 10 Shawn Mendes     pop                   0.642
+## # … with 10,448 more rows
+```
+
+--
+
+**Question**: Is there a *relationship* between `genre` and `danceability`?
+
+---
+
+# Exploratory Data Analysis
+
+**Summary statistics**
+
+
+```
+## # A tibble: 2 x 4
+##   playlist_genre mean_dance sd_dance     n
+##   &lt;chr&gt;               &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+## 1 pop                 0.639    0.128  5507
+## 2 rock                0.521    0.140  4951
+```
+
+.pull-left[
+**Data visualization**
+
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+It *appears* that **pop** songs tend to have *higher* measures of "danceability" compared to **rock** songs. 
+
+- Is the difference **large enough**?
+]
+
+---
+
+# Point Estimate
+
+**Difference between means**
+
+- `\(\bar{x}_{p}-\bar{x}_{r}=0.639-0.521=0.118\)`
+
+--
+
+**Interpretation**: *In the sample*, the *danceability score* of pop songs is 0.118 points higher *on average* than rock songs. 
+
+- But **samples vary**!
+
+--
+
+.pull-left[
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# The t-distribution
+
+Similar to the *one sample* case for **means**, we'll model the *difference between means* using the **t-distribution**. 
+
+.center[
+&lt;img src="10-Numerical_Two_files/figure-html/unnamed-chunk-7-1.png" width="65%" /&gt;
+]
+
+--
+
+**Conditions**
+
+- *Independence, extended*
+
+- *Normality*
+
+---
+
+# Reviewing Standard Error
+
+The **standard error** gives a measure of *variability* for sample statistics from *sample to sample*. 
+
+- For *single mean*: `$$SE_{\bar{x}}=\frac{s}{\sqrt{n}}=\sqrt{\frac{s^{2}}{n}}$$`
+
+--
+
+- For *difference between means*: `$$SE_{\bar{x}_{1}-\bar{x}_{2}}=\sqrt{\frac{s_{1}^{2}}{n_{1}}+\frac{s_{2}^{2}}{n_{2}}}$$`
+
+--
+
+**Spotify data**
+
+
+```r
+sqrt(0.128^2/5507 + 0.140^2/4951)
+```
+
+```
+## [1] 0.002633234
+```
+
+---
+
+# 95% Confidence Intervals
+
+Similar to confidence intervals for a *single mean*: `$$\bar{x}\pm t^{*}_{df}\times\frac{s}{\sqrt{n}}$$`
+
+--
+
+For a **difference between means**: `$$(\bar{x}_{1}-\bar{x}_{2})\pm t^{*}_{df}\times \sqrt{\frac{s_{1}^{2}}{n_{1}}+\frac{s_{2}^{2}}{n_{2}}}$$`
+
+--
+
+- In this case, `\(df=\min(n_{1}-1, n_{2}-1)\)`
+
+
+```r
+min(5507-1, 4951-1)
+```
+
+```
+## [1] 4950
+```
+
+---
+
+# 95% Confidence Intervals
+
+As before, we'll use `qt()` to find `\(t^{*}_{df}\)`. 
+- Depends on the **df** *and* **confidence level**. 
+
+
+```r
+val = 1 - (1-0.95)/2 #For 95% CI
+qt(val, df = 4950)
+```
+
+```
+## [1] 1.960443
+```
+
+--
+
+Putting it all together...
+
+
+```r
+c(0.118 - 1.960443*0.002633234, 
+  0.118 + 1.960443*0.002633234)
+```
+
+```
+## [1] 0.1128377 0.1231623
+```
+
+--
+
+**Interpretation**: We are **95% confident** that the average danceability of *pop* songs is between 0.113 and 0.123 points *higher* than *rock* songs. 
+
+---
+
+# Smaller Samples
+
+What if we only had 10 pop and 10 rock songs?
+
+--
+
+.pull-left[
+
+```
+## # A tibble: 2 x 3
+##   playlist_genre mean_dance sd_dance
+##   &lt;chr&gt;               &lt;dbl&gt;    &lt;dbl&gt;
+## 1 pop                 0.667   0.0976
+## 2 rock                0.575   0.144
+```
+
+`\(\bar{x}_{p}-\bar{x}_{r}=0.092\)`
+]
+
+.pull-right[
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+]
+
+--
+
+**95% Confidence Interval**
+
+
+```
+## [1] -0.03244283  0.21644283
+```
+
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing (for two means)
+
+---
+
+# (Smaller) Spotify Data
+
+Let's work with the **smaller** Spotify dataset! 
+
+
+```r
+spotify_rp_small
+```
+
+```
+## # A tibble: 20 x 4
+##    track_name                        track_artist    playlist_genre danceability
+##    &lt;chr&gt;                             &lt;chr&gt;           &lt;chr&gt;                 &lt;dbl&gt;
+##  1 Controlla                         Drake           pop                   0.611
+##  2 BOOM                              X Ambassadors   pop                   0.732
+##  3 Understand (How Bout No) [The DM… Freak Daddy     pop                   0.732
+##  4 Quedate feat. LouisaFer (Origina… Cesar Vilo      pop                   0.824
+##  5 I'm Sorry That I Love You         Peachro         pop                   0.712
+##  6 Can't Stop Singing                Ross Lynch      pop                   0.513
+##  7 Lonely (with Jonas Brothers)      Diplo           pop                   0.738
+##  8 Crocodile Tears                   Unlike Pluto    pop                   0.662
+##  9 Youngblood                        5 Seconds of S… pop                   0.596
+## 10 Into Your Arms                    Kxa             pop                   0.55 
+## 11 Memory                            BrokenRail      rock                  0.417
+## 12 Like a Rolling Stone              Bob Dylan       rock                  0.483
+## 13 Love Will Conquer All             Lionel Richie   rock                  0.79 
+## 14 Sneakers                          The Inoculated… rock                  0.42 
+## 15 Carry on Wayward Son              Kansas          rock                  0.483
+## 16 Turn Up                           The Heavy       rock                  0.533
+## 17 One Thing Leads To Another        The Fixx        rock                  0.785
+## 18 Tears in Heaven - Acoustic; Live… Eric Clapton    rock                  0.695
+## 19 A Horse with No Name              America         rock                  0.654
+## 20 We Stand as One                   Wishbone Ash    rock                  0.49
+```
+
+---
+
+# Hypotheses
+
+Let `\(\mu_{p}\)` and `\(\mu_{r}\)` be the (unknown) **population mean** danceability of the two genres. 
+
+- `\(H_{0}\)` (**Null** hypothesis): `\(\mu_{p}-\mu_{r}=0\)`, or `\(\mu_{p}=p_{r}\)`
+
+- `\(H_{A}\)` (**Alternative** hypothesis): `\(\mu_{p}-\mu_{r}\neq0\)` or `\(\mu_{p}\neq \mu_{r}\)`
+
+--
+
+*In words...*
+
+- `\(H_{0}\)`: **No difference** in mean danceability between genres
+    - *danceability* and *genre* are **independent**
+    
+- `\(H_{A}\)`: **A difference** in mean danceability between genres
+    - *danceability* and *genre* are **associated**
+ 
+&lt;br&gt;
+
+We'll play the role of the **skeptic**. Assume `\(H_{0}\)` until there is *convincing evidence* that it is false. 
+
+- "Evidence": `\(\bar{x}_{p}-\bar{x}_{r}=0.092\)`
+
+---
+
+# Simulating the Null Distribution
+
+(One shuffle)
+
+
+
+
+```r
+spotify_rp_shuffle
+```
+
+```
+## # A tibble: 20 x 4
+##    track_name                        track_artist    playlist_genre danceability
+##    &lt;chr&gt;                             &lt;chr&gt;           &lt;chr&gt;                 &lt;dbl&gt;
+##  1 Controlla                         Drake           rock                  0.611
+##  2 BOOM                              X Ambassadors   rock                  0.732
+##  3 Understand (How Bout No) [The DM… Freak Daddy     rock                  0.732
+##  4 Quedate feat. LouisaFer (Origina… Cesar Vilo      pop                   0.824
+##  5 I'm Sorry That I Love You         Peachro         pop                   0.712
+##  6 Can't Stop Singing                Ross Lynch      pop                   0.513
+##  7 Lonely (with Jonas Brothers)      Diplo           rock                  0.738
+##  8 Crocodile Tears                   Unlike Pluto    rock                  0.662
+##  9 Youngblood                        5 Seconds of S… rock                  0.596
+## 10 Into Your Arms                    Kxa             pop                   0.55 
+## 11 Memory                            BrokenRail      pop                   0.417
+## 12 Like a Rolling Stone              Bob Dylan       pop                   0.483
+## 13 Love Will Conquer All             Lionel Richie   rock                  0.79 
+## 14 Sneakers                          The Inoculated… rock                  0.42 
+## 15 Carry on Wayward Son              Kansas          pop                   0.483
+## 16 Turn Up                           The Heavy       pop                   0.533
+## 17 One Thing Leads To Another        The Fixx        rock                  0.785
+## 18 Tears in Heaven - Acoustic; Live… Eric Clapton    rock                  0.695
+## 19 A Horse with No Name              America         pop                   0.654
+## 20 We Stand as One                   Wishbone Ash    pop                   0.49
+```
+
+---
+
+# Simulating the Null Distribution
+
+(Several shuffles)
+
+
+```r
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```
+## diffmean 
+##   -0.068
+```
+
+
+```r
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```
+## diffmean 
+##  -0.1134
+```
+
+
+```r
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```
+## diffmean 
+##  -0.1328
+```
+
+
+```r
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```
+## diffmean 
+##   0.0242
+```
+
+---
+
+# Null Distribution
+
+.pull-left[
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+Why **two** red lines?
+
+- `\(H_{A}\)`: `\(\mu_{p}-\mu_{r}\neq0\)` 
+
+"Evidence" *in favor of* `\(H_{A}\)` comes from *both sides*!
+]
+
+--
+
+- In 1,000 simulations of `\(H_{0}\)`, 10.8% (108/1000) yielded a *difference in means* **more extreme** than observed. 
+
+---
+
+# Test Statistic
+
+Alternatively, provided the **conditions** are met, we can model the *null distribution* using the **t-distribution**. 
+
+- First, calculate the **test statistic**: `$$T=\frac{\text{point estimate} - \text{null value}}{SE_{\bar{x}_{p}-\bar{x}_{r}}}=\frac{(\bar{x}_{p}-\bar{x}_{r})-0}{\sqrt{\frac{s_{p}^{2}}{n_{p}} + \frac{s_{r}^{2}}{n_{r}}}}$$`
+
+--
+
+
+```r
+(0.092 - 0)/sqrt(0.0976^2/10 + 0.144^2/10)
+```
+
+```
+## [1] 1.672402
+```
+
+---
+
+# (Standardized) Null Distribution
+
+We can compare the T statistic, `\(T=1.67\)` to the (standardized) null distribution. 
+- **t-distribution** with `\(df = min(n_{p}-1, n_{r}-1)=9\)` 
+
+--
+
+.pull-left[
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](10-Numerical_Two_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# t.test
+
+These *hypothesis tests for a difference between means* commonly go by a different name:
+- **Two-sample t-test**
+
+--
+
+**In R**:
+
+
+```r
+t.test(danceability ~ playlist_genre, alternative = "two.sided", 
+        data = spotify_rp_small)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  danceability by playlist_genre
+## t = 1.6746, df = 15.848, p-value = 0.1136
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.02455581  0.20855581
+## sample estimates:
+##  mean in group pop mean in group rock 
+##              0.667              0.575
+```
+
+--
+
+**Conclusion**: p-value `\(&gt;0.05\)`, *fail to reject the null*. We do not have enough evidence to suggest that average danceability score is *different* between rock and pop songs.
+
+---
+
+# BUT
+
+What happens when we work with a **larger** dataset?!
+
+
+```r
+t.test(danceability ~ playlist_genre, alternative = "two.sided", 
+        data = spotify_rp)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  danceability by playlist_genre
+## t = 45.09, df = 10082, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.1135911 0.1239164
+## sample estimates:
+##  mean in group pop mean in group rock 
+##          0.6393017          0.5205480
+```
+
+--
+
+**Sample size** plays an important role. 
+
+- Always include **confidence intervals** for the complete picture.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

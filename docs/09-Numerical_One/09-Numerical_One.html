@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Inference for Numerical Data (One Group)
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Central Limit Theorem .display[for means]
+    
+--
+
+## The .display[t-distribution]
+
+--
+
+## Hypothesis testing for .display[single mean]
+    
+---
+
+class: center, middle, frame
+
+# Central Limit Theorem (for means)
+
+---
+
+# Boston Airbnb Data
+
+
+```r
+airbnb_boston
+```
+
+```
+## # A tibble: 2,980 x 10
+##    price reviews_per_mon… accommodates bathrooms bedrooms  beds property_type
+##    &lt;dbl&gt;            &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;        
+##  1   125             0.28            2         1        1     0 Apartment    
+##  2   145             0.79            2         1        1     1 Other        
+##  3   169             0.88            4         1        1     1 Other        
+##  4    99             0.35            2         1        1     1 Apartment    
+##  5   150             0.24            2         1        1     1 Apartment    
+##  6   179             2.74            3         1        0     1 Apartment    
+##  7   125             0.04            2         1        0     1 Other        
+##  8   154             0.43            7         1        3     3 Apartment    
+##  9   115             0.17            4         1        0     2 Other        
+## 10   275             0.89            5         2        2     3 Other        
+## # … with 2,970 more rows, and 3 more variables: room_type &lt;chr&gt;,
+## #   neighbourhood &lt;chr&gt;, minimum_nights &lt;dbl&gt;
+```
+
+- Sample of `\(n=2980\)` Boston Airbnbs
+
+We are interested in estimating the **average price per night** of Airbnbs in *major US cities*.
+
+---
+
+# Exploratory Data Analysis
+
+.pull-left[
+
+```r
+gf_histogram( ~ price, 
+              data = airbnb_boston)
+```
+
+![](09-Numerical_One_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+- **right-skewed**
+- **typical** prices per night are ~150
+
+]
+
+--
+
+.pull-right[
+
+```r
+favstats( ~ price, 
+          data = airbnb_boston)
+```
+
+```
+ min Q1 median  Q3  max     mean       sd    n missing
+   0 80    133 199 2000 163.5201 140.8283 2980       0
+```
+
+- `\(\bar{x}=163.52\)` (**sample mean**)
+
+- `\(s=140.83\)` (**sample standard deviation**)
+]
+
+---
+
+# Sampling Variability
+
+In our *single sample* of Airbnbs, 
+
+- `\(\bar{x}=163.52\)`, `\(s=140.83\)`
+
+--
+
+**Central Limit Theorem**: When we collect a *sufficiently large* sample of `\(n\)` *independent* observations, the **sampling distribution** of `\(\bar{x}\)` is Normal with:
+- `\(\mu_{\bar{x}}=\mu\)` (*unknown* population mean)
+- `\(\sigma_{\bar{x}}=\sigma/\sqrt{n}\)`
+
+--
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-5-1.png" width="65%" /&gt;
+]
+
+---
+
+# CLT Conditions
+
+Two conditions for using the CLT with `\(\bar{x}\)`
+
+**Independence**: The sampled observations are independent. 
+
+- Satisfied if the sample is **random**
+
+    - Is this condition satisfied for the Airbnb data?
+
+--
+
+**Normality**: *IF the sample is small*, the sample observations must come from a *Normal population*. 
+
+- `\(n&lt;30\)`: If there are *no clear outliers*, we **assume** the data are sampled from a *nearly Normal* distribution. 
+
+- `\(n\geq30\)`: If there are no **extreme outliers**, we assume that the sampling distribution of `\(\bar{x}\)` is nearly Normal. 
+    
+---
+
+# Standard Error
+
+The **standard error** describes how much estimated variability one can expect in the *sample statistic*. 
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-6-1.png" width="60%" /&gt;
+]
+
+--
+
+The **standard deviation** of `\(\bar{x}\)` is given by `\(SD(\bar{x})=\sigma/\sqrt{n}\)`. 
+
+- We *estimate* this with the **standard error**: `$$SE_{\bar{x}}=\frac{s}{\sqrt{n}}=\frac{140.83}{\sqrt{2980}}=2.58$$`
+
+--
+
+
+```r
+140.83/sqrt(2980)
+```
+
+```
+## [1] 2.579806
+```
+
+---
+
+class: center, middle, frame
+
+# The t-distribution
+
+---
+
+# The t-distribution
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-8-1.png" width="65%" /&gt;
+]
+
+--
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-9-1.png" width="65%" /&gt;
+]
+
+---
+
+# The t-distribution
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-10-1.png" width="65%" /&gt;
+]
+
+- **Always** centered at *zero*
+
+- One parameter controls the *form* of the bell-shape: the **degrees of freedom** (*df*)
+    - *df* `\(=n-1\)`
+    
+---
+
+# Degrees of Freedom (df)
+
+*df* `\(=n-1\)`
+
+- The *larger the sample*, the **larger the df**. 
+
+--
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-11-1.png" width="75%" /&gt;
+]
+
+--
+
+In the Airbnb example, `\(n=2980\)`, so *df* `\(=2979\)`. 
+
+---
+
+# Confidence Intervals using t-distribution
+
+Define `\(\mu\)` as the **population mean** of Airbnb price per night. 
+
+- This is *unknown*, but `\(\bar{x}=163.52\)` serves as a **point estimate**. 
+
+--
+
+A **confidence interval** represents a *range of plausible values* for `\(\mu\)`. 
+
+Using the **t-distribution**:
+
+- `\(\bar{x}\pm t^{*}_{df}\times SE_{\bar{x}}\)`
+
+--
+
+The `\(t^{*}_{df}\)` value depends on the **confidence level** AND the *df*. 
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-12-1.png" width="75%" /&gt;
+]
+
+---
+
+# Confidence Intervals using t-distribution
+
+Define `\(\mu\)` as the **population mean** of Airbnb price per night. 
+
+- This is *unknown*, but `\(\bar{x}=163.52\)` serves as a **point estimate**. 
+
+A **confidence interval** represents a *range of plausible values* for `\(\mu\)`. 
+
+Using the **t-distribution**:
+
+- `\(\bar{x}\pm t^{*}_{df}\times SE_{\bar{x}}\)`
+
+The `\(t^{*}_{df}\)` value depends on the **confidence level** AND the *df*. 
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-13-1.png" width="75%" /&gt;
+]
+
+---
+
+# qt()
+
+We'll use `qt()` to find `\(t_{df}\)` distribution *quantiles*.
+- Works similarly to `qnorm()`. 
+
+.pull-left[
+
+```r
+val = 1 - (1-0.95)/2 # For 95% CI
+qt(val, df = 2979) 
+```
+
+```
+## [1] 1.960761
+```
+
+
+```r
+val = 1 - (1-0.95)/2 # For 95% CI
+qt(val, df = 14)
+```
+
+```
+## [1] 2.144787
+```
+]
+
+--
+
+.pull-right[
+
+```r
+qnorm(val)
+```
+
+```
+## [1] 1.959964
+```
+
+
+```r
+qt(val, 
+   df = c(5, 50, 250, 250000))
+```
+
+```
+## [1] 2.570582 2.008559 1.969498 1.959973
+```
+]
+
+---
+
+# 95% Confidence Intervals
+
+**Airbnb example**
+
+- `\(SE_{\bar{x}}=s/\sqrt{n}=140.83/\sqrt{2980}=2.58\)`
+
+- `\(\bar{x}\pm t^{*}_{df}\times SE_{\bar{x}} \longrightarrow 163.52\pm1.96\times2.58\)`
+
+
+```r
+c(163.52 - 1.96*2.58, 163.52 + 1.96*2.58)
+```
+
+```
+## [1] 158.4632 168.5768
+```
+
+--
+
+**Interpretation**: We are **95% confident** that the *average* price per night of Airbnbs in *major US cities* is between 	&amp;#36;158.46 and &amp;#36;168.58. 
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-19-1.png" width="60%" /&gt;
+]
+
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing (for single mean)
+
+---
+
+# Do you get enough sleep
+
+[According to the NIH](https://www.nhlbi.nih.gov/files/docs/public/sleep/healthysleepfs.pdf), most adults require *~7.5 hours of sleep* each night. 
+
+--
+
+
+
+In a survey of 25 randomly selected college students...
+
+
+```r
+favstats( ~ hours, data = sleep_samp)
+```
+
+```
+##       min       Q1   median       Q3      max     mean       sd  n missing
+##  1.705423 4.506997 5.625398 7.083178 10.91656 5.866766 2.193591 25       0
+```
+
+- `\(\bar{x}=5.866766\)` hours, `\(s=2.193591\)` hours
+
+--
+
+&lt;br&gt;
+
+**Question**: Do the data provide sufficient *evidence* that college students generally sleep for *fewer* hours than recommended?
+
+---
+
+# Exploratory Data Analysis
+
+
+```r
+gf_histogram(~ hours, binwidth = 1, data = sleep_samp)
+```
+
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-22-1.png" width="45%" /&gt;
+
+- **unimodal**
+- *no major outliers*
+
+---
+
+# Competing Hypotheses
+
+Define `\(\mu\)` as the **population mean** hours of sleep per night. 
+
+- `\(H_{0}\)` (**Null hypothesis**): `\(\mu = 7.5\)`
+
+- `\(H_{A}\)` (**Alternative hypothesis**): `\(\mu &lt; 7.5\)`
+
+--
+
+We'll play the role of the **skeptic**. Assume `\(H_{0}\)` until there is *convincing evidence* that it is false. 
+
+- Calculate the **test statistic**, and see how that "evidence" appears *in a world where the null is true*. 
+
+---
+
+# Test Statistic
+
+Similar to hypothesis tests for **proportions**!
+
+- **Proportions**: `$$Z=\frac{\text{point estimate} - \text{null value}}{SE_{\hat{p}}}$$`
+
+--
+
+- **Means**: `$$T=\frac{\text{point estimate} - \text{null value}}{SE_{\bar{x}}}$$`
+    - `\(SE_{\bar{x}}=s/\sqrt{n}\)`
+    
+--
+
+
+```r
+T = (5.866766 - 7.5)/(2.193591/sqrt(25))
+T
+```
+
+```
+## [1] -3.72274
+```
+
+---
+
+# Null Distribution
+
+.center[
+&lt;img src="09-Numerical_One_files/figure-html/unnamed-chunk-24-1.png" width="65%" /&gt;
+]
+
+- **p-value**: The probability of observing data *more extreme than yours*, **in a world where the null hypothesis is true**
+
+--
+
+Calculate **tail areas** in the *t*-distribution with `pt()`:
+
+```r
+pt(-3.72274, df = 24)
+```
+
+```
+## [1] 0.0005291831
+```
+
+---
+
+# t.test
+
+These *hypothesis tests for a single mean* commonly go by a different name:
+- **One-sample t-test**
+
+--
+
+**In R**:
+
+
+```r
+t.test( ~ hours, alternative = "less", mu = 7.5, 
+        data = sleep_samp)
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  hours
+## t = -3.7227, df = 24, p-value = 0.0005292
+## alternative hypothesis: true mean is less than 7.5
+## 95 percent confidence interval:
+##      -Inf 6.617361
+## sample estimates:
+## mean of x 
+##  5.866766
+```
+
+--
+
+**Conclusion**: p-value `\(&lt;0.05\)`, *reject the null*. We have evidence to suggest that students sleep for fewer hours per night than the recommended amount, on average.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

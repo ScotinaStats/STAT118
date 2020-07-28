@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Inference for Categorical Data (Two Groups)
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Comparing .display[groups]
+
+--
+
+## Confidence intervals for .display[two proportions]
+  
+--
+
+## Hypothesis testing for .display[two proportions]
+    
+---
+
+class: center, middle, frame
+
+# Comparing Groups
+
+---
+
+# Technology Before Sleep
+
+[2011 National Sleep Foundation Report](https://www.sleepfoundation.org/professionals/sleep-americar-polls/2011-poll-technology-and-sleep)
+
+.center[
+&lt;img src="sleep_table.png" width="593" /&gt;
+]
+
+---
+
+# Technology Before Sleep
+
+- 293 gen-Y respondents: **205 (70%)** reported regularly using technology before trying to going to sleep. 
+    - `\(n_{y}=293\)`, `\(\hat{p}_{y}=0.70\)`
+
+- 469 gen-X respondents: **235 (50%)** reported regularly using technology before trying to going to sleep. 
+    - `\(n_{x}=469\)`, `\(\hat{p}_{x}=0.50\)`
+    
+--
+
+**Question**: Is there *statistical evidence* that more gen-Yers use technology before bed than gen-Xers?
+
+--
+
+- Confidence intervals for the **difference in proportions**
+
+- Hypothesis testing for the **difference in proportions**
+
+---
+
+# Point Estimate
+
+When *comparing two groups*, the point estimate is the **difference between proportions**. 
+
+- `\(\hat{p}_{y}-\hat{p}_{x}=0.70-0.50=0.20\)`
+
+--
+
+**Interpretation**: *In the sample*, 20% *more gen-Yers* used technology before going to bed than *gen-Xers*. 
+
+- But **samples vary**!
+
+--
+
+.pull-left[
+![](08-Categorical_Two_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](08-Categorical_Two_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+]
+
+---
+
+class: center, middle, frame
+
+# Confidence Intervals (for two proportions)
+
+---
+
+# Many (Simulated) Samples
+
+Let's **assume** for a moment that...
+
+- 48% of **all** gen-Xers use technology before sleep
+- 73% of **all** gen-Yers use technology before sleep
+
+Under this *assumption*, let's simulate taking *many* samples from the population, and calculating their **difference in proportions**:
+
+--
+
+.center[
+&lt;img src="08-Categorical_Two_files/figure-html/unnamed-chunk-5-1.png" width="45%" /&gt;
+]
+
+---
+
+# Sampling Distributions
+
+.pull-left[
+![](08-Categorical_Two_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+- Centered at **0.25**
+
+- Nearly **Normal**
+
+- Standard deviation of **0.031** 
+]
+
+--
+
+But... provided the **conditions** are met, we have the **Central Limit Theorem**. 
+
+---
+
+# Central Limit Theorem (CLT)
+
+When:
+- observations are **independent**, and
+- the *sample sizes* are **sufficiently large**, 
+
+the difference in sample proportion, `\(\hat{p}_{y}-\hat{p}_{x}\)`, will follow a **Normal distribution** with *mean* and *standard deviation* given by: `$$\mu_{\hat{p}_{y}-\hat{p}_{x}}=p_{y}-p_{x}\quad\text{and}\quad SD_{\hat{p}_{y}-\hat{p}_{x}}=\sqrt{\frac{p_{y}(1-p_{y})}{n_{y}} + \frac{p_{x}(1-p_{x})}{n_{x}}}$$`
+
+--
+
+Using `\(n_{y}=293\)` and `\(n_{x}=469\)`, with `\(p_{y}=0.73\)` and `\(p_{x}=0.48\)`, 
+
+
+```r
+0.73-0.48 # Mean
+```
+
+```
+## [1] 0.25
+```
+
+```r
+sqrt(0.48*0.52^2/469 + 0.73*0.27/293) # SD
+```
+
+```
+## [1] 0.03081296
+```
+
+---
+
+# Standard Error
+
+**Remember**, population *parameters* are **unknown**. 
+
+- Estimate `\(SD_{\hat{p}_{y}-\hat{p}_{x}}\)` with `\(SE_{\hat{p}_{y}-\hat{p}_{x}}\)`: `$$SE_{\hat{p}_{y}-\hat{p}_{x}}=\sqrt{\frac{\hat{p}_{y}(1-\hat{p}_{y})}{n_{y}} + \frac{\hat{p}_{x}(1-\hat{p}_{x})}{n_{x}}}$$`
+
+--
+
+Using `\(\hat{p}_{y}=0.70\)` and `\(\hat{p}_{x}=0.50\)`, 
+
+
+```r
+sqrt(0.50*0.50/469 + 0.70*0.30/293) # SE
+```
+
+```
+## [1] 0.03535212
+```
+
+---
+
+# 95% Confidence Intervals
+
+Similar to CIs for a *single proportion*: `$$\text{point estimate}\pm 1.96*SE$$`
+
+--
+
+For a **difference between proportions**: `$$(\hat{p}_{y}-\hat{p}_{x})\pm 1.96*\sqrt{\frac{\hat{p}_{x}(1-\hat{p}_{x})}{n_{x}} + \frac{\hat{p}_{x}(1-\hat{p}_{x})}{n_{x}}}$$`
+
+- **Point estimate**: `\(\hat{p}_{y}-\hat{p}_{x}=0.20\)`
+
+- **Standard error**: `\(SE_{\hat{p}_{y}-\hat{p}_{x}}=0.035\)`
+
+--
+
+
+```r
+c(0.20 - 1.96*0.035, 0.20 + 1.96*0.035)
+```
+
+```
+## [1] 0.1314 0.2686
+```
+
+---
+
+# Interpreting Confidence Intervals
+
+
+```r
+c(0.20 - 1.96*0.035, 0.20 + 1.96*0.035)
+```
+
+```
+## [1] 0.1314 0.2686
+```
+
+.center[
+&lt;img src="08-Categorical_Two_files/figure-html/unnamed-chunk-11-1.png" width="65%" /&gt;
+]
+
+- We are **95% confident** that between 13.1% and 26.9% **more** gen-Yers use technology before going to bed than gen-Xers. 
+
+--
+
+**Question**: Does this provide *convincing* evidence that more gen-Yers use technology before going to bed than gen-Xers?
+
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing (for two proportions)
+
+---
+
+# Stating the Hypotheses
+
+When comparing *two proportions*, the **null** and **alternative** hypotheses will be statements about **two** population proportions:
+
+- `\(H_{0}\)` (**Null** hypothesis): `\(p_{1}-p_{2}=0\)`, or `\(p_{1}=p_{2}\)`
+
+- `\(H_{A}\)` (**Alternative** hypothesis): `\(p_{1}-p_{2}\neq0\)` (or `\(&gt;\)`, `\(&lt;\)`), or `\(p_{1}\neq p_{2}\)`
+
+--
+
+In the [technology before sleep](https://www.sleepfoundation.org/professionals/sleep-americar-polls/2011-poll-technology-and-sleep) example:
+
+- `\(H_{0}\)`: **No difference** in technology use before bed for gen-Y and gen-X.
+    - `\(p_{y}-p_{x}=0\)`
+
+- `\(H_{A}\)`: Gen-Y has a **higher proportion** of technology use before bed.
+    - `\(p_{y}-p_{x}&gt;0\)`, or `\(p_{y}&gt;p_{x}\)`
+
+--
+
+We'll play the role of the **skeptic**. Assume `\(H_{0}\)` until there is *convincing evidence* that it is false. 
+
+---
+
+# Assuming the Null
+
+By initially assuming the *null hypothesis*, we are assuming the following:
+
+- `\(p_{y}-p_{x}=0\)` (*Generation* and *bedtime technology use* are **independent**.)
+
+--
+
+We can **simulate** the *null distribution* by randomly shuffling study respondents into generation groups:
+
+.pull-left[
+**Observed data**
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; tech_use &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; generation &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Y &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; X &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Y &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; X &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Y &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Y &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; X &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ... &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ... &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+--
+
+.pull-right[
+**Pre-shuffled data**
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; tech_use &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; generation &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Yes &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ? &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ... &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ... &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+
+# Simulating the Null Distribution
+
+What would a **sampling distribution** of `\(\hat{p}_{y}-\hat{p}_{x}\)` look like...
+- if `\(p_{y}=p_{x}\)`?
+
+--
+
+
+
+
+```r
+diffprop(tech_use ~ shuffle(generation), data = gen_data)
+```
+
+```
+##    diffprop 
+## -0.03223764
+```
+
+--
+
+
+```r
+diffprop(tech_use ~ shuffle(generation), data = gen_data)
+```
+
+```
+##    diffprop 
+## 0.006578516
+```
+
+--
+
+
+```r
+diffprop(tech_use ~ shuffle(generation), data = gen_data)
+```
+
+```
+##   diffprop 
+## 0.02875918
+```
+
+---
+
+# The Null Distribution
+
+We repeat *shuffling* and calculating the *difference in proportions* in bedtime technology use between gen-Y and gen-X to obtain a **null distribution**. 
+
+.pull-left[
+![](08-Categorical_Two_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+- Centered at **zero**
+
+- Approximately **Normal**
+
+In 1,000 simulations, 0 (!!!) yielded a *point estimate* `\(\geq0.20\)`. 
+]
+
+---
+
+# Back to the CLT
+
+Provided the conditions are met:
+- By the **CLT**, the **null distribution** is **Normal** and centered at 0!
+
+.center[
+&lt;img src="08-Categorical_Two_files/figure-html/unnamed-chunk-19-1.png" width="65%" /&gt;
+]
+
+---
+
+# Judging Evidence
+
+Our "evidence":
+
+- With `\(n_{y}=293\)` gen-Yers and `\(n_{x}=469\)` gen-Xers, an *estimated* 20% *more* gen-Yers use technology before going to bed. 
+
+--
+
+.center[
+&lt;img src="08-Categorical_Two_files/figure-html/unnamed-chunk-20-1.png" width="65%" /&gt;
+]
+
+The **probability** of observing a *difference in proportions* more extreme than 0.20 is **near zero**. 
+
+- **p-value** = 0 (usually we say "&lt; 0.001")
+
+---
+
+# Test Statistic
+
+Similar to analyzing *one proportion*...
+
+- We typically **standardize** our "evidence" so that it's on a **standard Normal** scale.
+
+The **test statistic**, `\(Z\)`, is a `\(z\)`-score: `$$Z=\frac{\text{point estimate} - \text{null value}}{SE}=\frac{0.20-0}{0.035}=5.66$$`
+
+--
+
+
+```r
+Z = (0.20-0)/sqrt(0.50*0.50/469 + 0.70*0.30/293) 
+Z
+```
+
+```
+## [1] 5.657369
+```
+
+---
+
+# Conclusion
+
+.pull-left[
+![](08-Categorical_Two_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+
+]
+
+.pull-right[
+
+```r
+1-pnorm(5.66)
+```
+
+```
+## [1] 7.56865e-09
+```
+
+- p-value `\(&lt;0.05\)`, so **reject the null hypothesis**. 
+
+- We have evidence to conclude that a *higher proportion* of gen-Yers use technology before bed than gen-Xers. 
+]
+
+--
+
+Don't forget **confidence intervals**!:
+
+.center[
+&lt;img src="08-Categorical_Two_files/figure-html/unnamed-chunk-24-1.png" width="65%" /&gt;
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,520 @@
+---
+title: "STAT 118: Introductory Statistics"
+subtitle: "Inference for Numerical Data (Two Groups)"
+author: "Anthony Scotina"
+date: 
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: my-theme.css
+    nature:
+      countIncrementalSlides: false
+      highlightLines: true
+---
+
+```{r xaringan-themer, include = FALSE}
+library(xaringanthemer)
+mono_accent(base_color = "#bf67bc") #3E8A83?
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(mosaic)
+library(moderndive)
+library(nycflights13)
+library(openintro)
+set.seed(12)
+data(COL)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 300)
+
+airbnb_boston <- read_csv("~/Dropbox/Teaching/03-Simmons Courses/STAT118-Introductory Statistics [ONLINE]/Data/airbnb_boston.csv")
+airbnb_boston = airbnb_boston %>%
+  filter(room_type != "Hotel room")
+
+theme_set(theme_minimal() +
+  theme(axis.title.x = element_text(size = 14, face = "bold"), 
+        axis.title.y = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12, face = "bold"), 
+        axis.text.y = element_text(size = 12, face = "bold")))
+```
+
+<!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+-->
+
+class: center, middle, frame
+
+# Module Plan
+
+## Confidence intervals for .display[two means]
+    
+--
+
+## Hypothesis testing for .display[two means]
+    
+---
+
+class: center, middle, frame
+
+# Comparing Groups (again)
+
+---
+
+# Jam Session
+
+[Spotify data](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-01-21/readme.md)
+
+- A *sample* of 10,458 songs from Spotify
+
+- Songs categorized as either **rock** or **pop**
+
+```{r, echo = FALSE}
+spotify_songs <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv')
+spotify_songs %>%
+  select(track_artist, playlist_genre, danceability) %>%
+  filter(playlist_genre %in% c("rock", "pop")) 
+```
+
+--
+
+**Question**: Is there a *relationship* between `genre` and `danceability`?
+
+---
+
+# Exploratory Data Analysis
+
+**Summary statistics**
+
+```{r, echo = FALSE}
+spotify_songs %>%
+  select(track_artist, playlist_genre, danceability) %>%
+  filter(playlist_genre %in% c("rock", "pop")) %>%
+  group_by(playlist_genre) %>%
+  summarize(mean_dance = mean(danceability), 
+            sd_dance = sd(danceability), 
+            n = n())
+```
+
+.pull-left[
+**Data visualization**
+
+```{r, echo = FALSE, fig.width = 8, fig.height = 5}
+spotify_rp = spotify_songs %>%
+  select(track_name, track_artist, playlist_genre, danceability) %>%
+  filter(playlist_genre %in% c("rock", "pop"))
+
+gf_boxplot(danceability ~ playlist_genre, data = spotify_rp) + 
+  labs(x = "")
+```
+]
+
+.pull-right[
+It *appears* that **pop** songs tend to have *higher* measures of "danceability" compared to **rock** songs. 
+
+- Is the difference **large enough**?
+]
+
+---
+
+# Point Estimate
+
+**Difference between means**
+
+- $\bar{x}_{p}-\bar{x}_{r}=0.639-0.521=0.118$
+
+--
+
+**Interpretation**: *In the sample*, the *danceability score* of pop songs is 0.118 points higher *on average* than rock songs. 
+
+- But **samples vary**!
+
+--
+
+.pull-left[
+```{r, echo = FALSE, fig.width = 5, fig.asp = .32}
+data.frame(range = seq(0, 1, 0.01)) %>%
+  ggplot(aes(x = range)) + 
+  geom_blank() + 
+  annotate("point", x = 0.118, y = 0.25, size = 3) + 
+  scale_x_continuous(limits = c(0.1, 0.15)) +
+  theme_minimal() + 
+  labs(x = "", y = "", title = "Point Estimate") + 
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.x = element_text(size = 12, face = "bold"))
+```
+]
+
+.pull-right[
+```{r, echo = FALSE, fig.width = 5, fig.asp = .32}
+data.frame(range = seq(0, 1, 0.01)) %>%
+  ggplot(aes(x = range)) + 
+  geom_blank() + 
+  annotate("point", x = 0.1187537, y = 0.25, size = 3) + 
+  geom_segment(y = 0.25, yend = 0.25, 
+               x = 0.1135911, xend = 0.1239164, 
+               color = "red", lty = 2) + 
+  scale_x_continuous(limits = c(0.1, 0.15)) +
+  theme_minimal() + 
+  labs(x = "", y = "", title = "Point Estimate (plus 95% Confidence Interval)") + 
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        axis.text.x = element_text(size = 12, face = "bold"))
+```
+]
+
+---
+
+# The t-distribution
+
+Similar to the *one sample* case for **means**, we'll model the *difference between means* using the **t-distribution**. 
+
+.center[
+```{r, echo = FALSE, fig.asp = .52, out.width = "65%"}
+plot(c(-5, 5),
+     c(0, dnorm(0)),
+     type = 'n',
+     axes = FALSE, xlab = "", ylab = "")
+axis(1, seq(-6, 6, 2))
+abline(h = 0)
+
+xleg <- 2
+yleg <- 0.35
+yleg.line.offset <- -0.07
+line.leg.width <- 0.55
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg, 2),
+    col = COL[4], lty = 3, lwd = 2.5)
+lines(
+    c(xleg, xleg + line.leg.width),
+    rep(yleg + yleg.line.offset, 2),
+    col = COL[1], lty = 1, lwd = 1.8)
+text(xleg + line.leg.width, yleg,
+    "Standard Normal",
+    col = COL[4], pos = 4)
+text(xleg + line.leg.width, yleg + yleg.line.offset,
+    "t-distribution",
+    col = COL[1], pos = 4)
+
+X <- seq(-6, 6, 0.01)
+Y <- dnorm(X)
+lines(X, Y, lty = 3, lwd = 2.5, col = COL[4])
+
+Y <- dt(X, 2)
+lines(X, Y, lwd = 1.8, col = COL[1])
+```
+]
+
+--
+
+**Conditions**
+
+- *Independence, extended*
+
+- *Normality*
+
+---
+
+# Reviewing Standard Error
+
+The **standard error** gives a measure of *variability* for sample statistics from *sample to sample*. 
+
+- For *single mean*: $$SE_{\bar{x}}=\frac{s}{\sqrt{n}}=\sqrt{\frac{s^{2}}{n}}$$
+
+--
+
+- For *difference between means*: $$SE_{\bar{x}_{1}-\bar{x}_{2}}=\sqrt{\frac{s_{1}^{2}}{n_{1}}+\frac{s_{2}^{2}}{n_{2}}}$$
+
+--
+
+**Spotify data**
+
+```{r}
+sqrt(0.128^2/5507 + 0.140^2/4951)
+```
+
+---
+
+# 95% Confidence Intervals
+
+Similar to confidence intervals for a *single mean*: $$\bar{x}\pm t^{*}_{df}\times\frac{s}{\sqrt{n}}$$
+
+--
+
+For a **difference between means**: $$(\bar{x}_{1}-\bar{x}_{2})\pm t^{*}_{df}\times \sqrt{\frac{s_{1}^{2}}{n_{1}}+\frac{s_{2}^{2}}{n_{2}}}$$
+
+--
+
+- In this case, $df=\min(n_{1}-1, n_{2}-1)$
+
+```{r}
+min(5507-1, 4951-1)
+```
+
+---
+
+# 95% Confidence Intervals
+
+As before, we'll use `qt()` to find $t^{*}_{df}$. 
+- Depends on the **df** *and* **confidence level**. 
+
+```{r}
+val = 1 - (1-0.95)/2 #For 95% CI
+qt(val, df = 4950)
+```
+
+--
+
+Putting it all together...
+
+```{r}
+c(0.118 - 1.960443*0.002633234, 
+  0.118 + 1.960443*0.002633234)
+```
+
+--
+
+**Interpretation**: We are **95% confident** that the average danceability of *pop* songs is between 0.113 and 0.123 points *higher* than *rock* songs. 
+
+---
+
+# Smaller Samples
+
+What if we only had 10 pop and 10 rock songs?
+
+--
+
+.pull-left[
+```{r, echo = FALSE}
+set.seed(228)
+spotify_rp_small = spotify_rp %>%
+  group_by(playlist_genre) %>%
+  sample_n(10) %>%
+  ungroup()
+
+spotify_rp_small %>%
+  group_by(playlist_genre) %>%
+  summarize(mean_dance = mean(danceability), 
+            sd_dance = sd(danceability))
+```
+
+$\bar{x}_{p}-\bar{x}_{r}=0.092$
+]
+
+.pull-right[
+```{r, echo = FALSE}
+gf_boxplot(danceability ~ playlist_genre, data = spotify_rp_small) + 
+  labs(x = "")
+```
+]
+
+--
+
+**95% Confidence Interval**
+
+```{r, echo = FALSE}
+c((0.667-0.575) - qt(0.975, df = 9)*sqrt(0.0976^2/10 + 0.144^2/10), 
+  (0.667-0.575) + qt(0.975, df = 9)*sqrt(0.0976^2/10 + 0.144^2/10))
+```
+
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing (for two means)
+
+---
+
+# (Smaller) Spotify Data
+
+Let's work with the **smaller** Spotify dataset! 
+
+```{r}
+spotify_rp_small
+```
+
+---
+
+# Hypotheses
+
+Let $\mu_{p}$ and $\mu_{r}$ be the (unknown) **population mean** danceability of the two genres. 
+
+- $H_{0}$ (**Null** hypothesis): $\mu_{p}-\mu_{r}=0$, or $\mu_{p}=p_{r}$
+
+- $H_{A}$ (**Alternative** hypothesis): $\mu_{p}-\mu_{r}\neq0$ or $\mu_{p}\neq \mu_{r}$
+
+--
+
+*In words...*
+
+- $H_{0}$: **No difference** in mean danceability between genres
+    - *danceability* and *genre* are **independent**
+    
+- $H_{A}$: **A difference** in mean danceability between genres
+    - *danceability* and *genre* are **associated**
+ 
+<br>
+
+We'll play the role of the **skeptic**. Assume $H_{0}$ until there is *convincing evidence* that it is false. 
+
+- "Evidence": $\bar{x}_{p}-\bar{x}_{r}=0.092$
+
+---
+
+# Simulating the Null Distribution
+
+(One shuffle)
+
+```{r, echo = FALSE}
+spotify_rp_shuffle = spotify_rp_small
+spotify_rp_shuffle$playlist_genre = shuffle(spotify_rp_shuffle$playlist_genre)
+```
+
+```{r}
+spotify_rp_shuffle
+```
+
+---
+
+# Simulating the Null Distribution
+
+(Several shuffles)
+
+```{r}
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```{r}
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```{r}
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+```{r}
+diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+```
+
+---
+
+# Null Distribution
+
+.pull-left[
+```{r, echo = FALSE}
+set.seed(118)
+gen_null <- do(1000) * diffmean(danceability ~ shuffle(playlist_genre), data = spotify_rp_small)
+#sum(abs(gen_null$diffmean) >= 0.092)/1000
+gf_histogram(~ diffmean, data = gen_null) + 
+  labs(x = "Difference in Mean danceability", 
+       title = "Rock vs Pop", 
+       subtitle = "Null Distribution: 1,000 simulations") + 
+  geom_vline(xintercept = 0.092, color = "red") + 
+  geom_vline(xintercept = -0.092, color = "red")
+```
+]
+
+.pull-right[
+Why **two** red lines?
+
+- $H_{A}$: $\mu_{p}-\mu_{r}\neq0$ 
+
+"Evidence" *in favor of* $H_{A}$ comes from *both sides*!
+]
+
+--
+
+- In 1,000 simulations of $H_{0}$, 10.8% (108/1000) yielded a *difference in means* **more extreme** than observed. 
+
+---
+
+# Test Statistic
+
+Alternatively, provided the **conditions** are met, we can model the *null distribution* using the **t-distribution**. 
+
+- First, calculate the **test statistic**: $$T=\frac{\text{point estimate} - \text{null value}}{SE_{\bar{x}_{p}-\bar{x}_{r}}}=\frac{(\bar{x}_{p}-\bar{x}_{r})-0}{\sqrt{\frac{s_{p}^{2}}{n_{p}} + \frac{s_{r}^{2}}{n_{r}}}}$$
+
+--
+
+```{r}
+(0.092 - 0)/sqrt(0.0976^2/10 + 0.144^2/10)
+```
+
+---
+
+# (Standardized) Null Distribution
+
+We can compare the T statistic, $T=1.67$ to the (standardized) null distribution. 
+- **t-distribution** with $df = min(n_{p}-1, n_{r}-1)=9$ 
+
+--
+
+.pull-left[
+```{r, echo = FALSE}
+set.seed(12)
+samp = data.frame(var = rt(10000, df = 9))
+gf_density( ~ var, data = samp) + 
+  geom_histogram(binwidth = 0.2, alpha = 0.3, fill = "blue") + 
+  geom_vline(xintercept = 1.67, color = "red") + 
+  geom_vline(xintercept = -1.67, color = "red") + 
+  labs(x = "T",
+       y = "",
+       title = "Standardized Null Distribution", 
+       subtitle = "t-distribution with 9 degrees of freedom") + 
+  theme(axis.text.y = element_blank(), 
+        axis.ticks.y = element_blank())
+```
+]
+
+.pull-right[
+```{r, echo = FALSE}
+#sum(abs(gen_null$diffmean) >= 0.092)/1000
+gf_histogram(~ diffmean, data = gen_null) + 
+  labs(x = "Difference in Mean danceability", 
+       title = "Rock vs Pop", 
+       subtitle = "Null Distribution: 1,000 simulations") + 
+  geom_vline(xintercept = 0.092, color = "red") + 
+  geom_vline(xintercept = -0.092, color = "red")
+```
+]
+
+---
+
+# t.test
+
+These *hypothesis tests for a difference between means* commonly go by a different name:
+- **Two-sample t-test**
+
+--
+
+**In R**:
+
+```{r}
+t.test(danceability ~ playlist_genre, alternative = "two.sided", 
+        data = spotify_rp_small)
+```
+
+--
+
+**Conclusion**: p-value $>0.05$, *fail to reject the null*. We do not have enough evidence to suggest that average danceability score is *different* between rock and pop songs.
+
+---
+
+# BUT
+
+What happens when we work with a **larger** dataset?!
+
+```{r}
+t.test(danceability ~ playlist_genre, alternative = "two.sided", 
+        data = spotify_rp)
+```
+
+--
+
+**Sample size** plays an important role. 
+
+- Always include **confidence intervals** for the complete picture. 
