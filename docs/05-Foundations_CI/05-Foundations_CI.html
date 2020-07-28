@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Foundations of Inference (Confidence Intervals)
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## .display[Variability] in estimates
+    
+--
+
+## .display[Central Limit Theorem] (CLT)
+    
+--
+
+## .display[Constructing] confidence intervals
+
+--
+
+## .display[Interpreting] confidence intervals
+    
+---
+
+class: center, middle, frame
+
+# Variability in Estimates
+
+---
+
+# Point Estimates
+
+[Fox News general election poll (June 18, 2020)](https://static.foxnews.com/foxnews.com/content/uploads/2020/06/Fox_June-13-16-2020_National_Topline_June-18-Release.pdf): `\(n=1343\)` *registered voters*
+
+- Biden: 50%
+
+- Trump: 38%
+
+--
+
+- **margin of sampling error** of `\(\pm 2.5\)` percentage points
+
+--
+
+The 50% is a **point estimate** of the percentage of *all* registered voters who will vote for Vice President Joe Biden in the 2020 presidential election. 
+- When the point estimate is a **proportion**, we define it with `\(\hat{p}\)` ("*p-hat*").
+
+--
+
+We **do not know** `\(p\)`, the proportion of *all* registered voters who will vote for Biden. 
+- `\(\hat{p}=0.50\)` represents our "best guess" at `\(p\)` (**parameter**). 
+
+---
+
+# Sampling Error
+
+But **samples vary**! That's why not all presidential polls are *identical*. 
+
+.center[
+&lt;img src="polls_538.png" width="659" /&gt;
+]
+
+- [Source: fivethirtyeight.com](https://projects.fivethirtyeight.com/polls/president-general/national/)
+
+--
+
+**Sampling variability** (or *uncertainty*) describes how a *point estimate* might vary from one sample to the next. 
+
+---
+
+# Understanding Variability
+
+Let's take a step back. **Assume** that 48% of registered voters will vote for Joe Biden in the election. 
+
+- (Using the 48% that Hillary Clinton received in the 2016 election)
+
+- **Assume**: `\(p=0.48\)`
+
+--
+
+**Question**: If we were to *poll* 1,343 registered voters from this population, would 48% say they're voting for Biden?
+
+--
+
+- What if we polled a *second sample* of 1,343 registered voters? A third sample?
+
+--
+
+.center[
+**How much will the `\(\hat{p}\)` values vary around 0.48?**
+]
+
+---
+
+# Simulations!
+
+`\(n = 1343\)`
+
+**Sample 1**
+
+
+```
+##     Biden 
+## 0.4497394
+```
+
+--
+
+**Sample 2**
+
+
+```
+##     Biden 
+## 0.4839911
+```
+
+--
+
+**Sample 3**
+
+
+```
+##     Biden 
+## 0.4966493
+```
+
+--
+
+**Sample 4**
+
+
+```
+##     Biden 
+## 0.4586746
+```
+
+---
+
+# Simulations!
+
+`\(n = 1343\)`
+
+**Sample 5**
+
+
+```
+##     Biden 
+## 0.4825019
+```
+
+**Sample 6**
+
+
+```
+##     Biden 
+## 0.4713328
+```
+
+**Sample 7**
+
+
+```
+##     Biden 
+## 0.4683544
+```
+
+**Sample 8**
+
+
+```
+##     Biden 
+## 0.4802681
+```
+
+---
+
+# Many (Simulated) Samples
+
+What if we took *many* samples of size `\(n=1343\)` from the population of registered voters?
+- Assuming that `\(p=0.48\)` will vote Biden
+
+--
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-11-1.png" width="50%" /&gt;
+]
+
+---
+
+# Sampling Distributions
+
+We just simulated a **sampling distribution**!
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-12-1.png" width="35%" /&gt;
+]
+
+A few key points:
+
+- These are never actually observed in real-life. (Why? **Only one sample**!)
+
+--
+
+- Still, think of a **point estimate** ("a poll finds that 50% will vote for Biden) as coming from such a hypothetical distribution. 
+
+--
+
+- We also just simulated the **Central Limit Theorem**!
+
+---
+
+class: center, middle, frame
+
+# Central Limit Theorem
+
+---
+
+# Central Limit Theorem (CLT)
+
+When:
+- observations are **independent**, and
+- the sample size is **sufficiently large**, 
+
+the sample proportion, `\(\hat{p}\)`, will follow a **Normal distribution** with *mean* and *standard deviation* given by: `$$\mu_{\hat{p}}=p\quad\text{and}\quad SD_\hat{p}=\sqrt{\frac{p(1-p)}{n}}$$`
+
+--
+
+**Independence**: Usually satisfied if observations are selected **randomly**
+
+--
+
+*Sufficiently large* sample size: There are *at least* 10 of each possible outcome (i.e., Biden vs Trump voters). 
+
+--
+
+- This is called the **success-failure condition**. 
+    - Check `\(np\geq 10\)` and `\(n(1-p)\geq10\)`
+    - In our simulations, `\(n=1343\)` and `\(p=0.48\)`. 
+    
+---
+
+# Calculating Standard Deviation 
+
+Using `\(n=1343\)` and `\(p=0.48\)` from our simulations, `$$SD_{\hat{p}}=\sqrt{\frac{p(1-p)}{n}}=\sqrt{\frac{0.48*0.52}{1343}}=0.014$$`
+
+--
+
+
+```r
+sqrt(0.48*0.52/1343)
+```
+
+```
+## [1] 0.01363278
+```
+
+--
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-14-1.png" width="40%" /&gt;
+]
+
+---
+
+# Applying the CLT in real-life
+
+A researcher can't just collect hundreds of different samples in real-life!
+
+- How can we verify that the sample proportion will follow a Normal distribution?
+
+--
+
+**Check conditions!**
+
+Using the [Fox News poll](https://static.foxnews.com/foxnews.com/content/uploads/2020/06/Fox_June-13-16-2020_National_Topline_June-18-Release.pdf) with `\(n=1343\)` and `\(\hat{p}=0.50\)`:
+
+- **Independence**: poll stated it collected a **random sample** of registered voters
+
+--
+
+- **Success-Failure condition**: Check `\(np\geq 10\)` and `\(n(1-p)\geq10\)`... but we don't know `\(p\)`...
+    - Use `\(\hat{p}\)` as an approximation (because it represents our "best guess")! 
+
+--
+
+
+```r
+1343*0.50
+```
+
+```
+## [1] 671.5
+```
+
+---
+
+# Standard Error
+
+By the **Central Limit Theorem**, `\(\hat{p}\)` follows a **Normal distribution**: `$$N\left(p, \sqrt{\frac{p(1-p)}{n}}\right)$$`
+
+- But we still don't know `\(p\)`!
+
+--
+
+To *approximate* the standard deviation, plug in `\(\hat{p}\)` in place of `\(p\)`: `$$SE_{\hat{p}}=\sqrt{\frac{0.50(1-0.50)}{1343}}=0.014$$`
+
+--
+
+
+```r
+sqrt(0.50*0.50/1343)
+```
+
+```
+## [1] 0.01364369
+```
+
+This standard deviation is *so special* that it has its own name: the **standard error** of `\(\hat{p}\)`!
+
+---
+
+class: center, middle, frame
+
+# Constructing Confidence Intervals
+
+---
+
+# Back to the Point Estimate
+
+[Fox News general election poll (June 18, 2020)](https://static.foxnews.com/foxnews.com/content/uploads/2020/06/Fox_June-13-16-2020_National_Topline_June-18-Release.pdf): `\(n=1343\)` *registered voters*
+
+- Biden: 50%
+
+**Question**: What does the 50% represent?
+
+--
+
+.center[
+A *single plausible value* for the percent of **all** Biden voters on election day.
+]
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-17-1.png" width="60%" /&gt;
+]
+
+--
+
+We *just found* that this value *isn't perfect*. 
+
+- The **standard error** is 0.014 (or 1.4%). 
+
+---
+
+# What's better than a point estimate?
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-18-1.png" width="60%" /&gt;
+]
+
+--
+
+.pull-left[
+&lt;img src="upgrade.jpeg" width="140" /&gt;
+]
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-20-1.png" width="60%" /&gt;
+]
+
+---
+
+# Confidence Intervals
+
+A **confidence interval (CI)** represents a *range of plausible values* for an unknown population parameter. 
+
+--
+
+.pull-left[
+A *single point estimate* is similar to fishing in a murky lake with a spear. 
+
+&lt;img src="spear.jpg" width="144" /&gt;
+]
+
+--
+
+.pull-right[
+A **confidence interval** is like fishing with a net!
+
+&lt;img src="net.jpg" width="144" /&gt;
+]
+
+--
+
+&lt;br&gt;
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-23-1.png" width="60%" /&gt;
+]
+
+---
+
+# Constructing CIs
+
+The **point estimate**, `\(\hat{p}\)`, represents a *plausible* value for the population **parameter**, `\(p\)`.
+
+- So we can build the CI around `\(\hat{p}\)`! `$$\hat{p}$$`
+
+--
+
+The **standard error**, `\(SE_{\hat{p}}\)`, represents the estimated amount of *variability* one might expect in `\(\hat{p}\)` from sample to sample. 
+
+- The `\(SE_{\hat{p}}\)` provides a guide for how *wide* the CI is on either side of `\(\hat{p}\)`. `$$\hat{p}\pm\  ?*SE_{\hat{p}}$$`
+
+--
+
+But what is "?"
+
+- This depends on our chosen **confidence level**. 
+
+---
+
+# Constructing 95% CIs
+
+**Recall**: When the **Central Limit Theorem** conditions are satisfied, `\(\hat{p}\)` follows a *Normal* distribution. 
+
+.pull-left[
+
+![](05-Foundations_CI_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+![](05-Foundations_CI_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+]
+
+--
+
+We can be **95% confident** that this interval catches the population parameter: `$$\text{point estimate} \pm1.96*SE$$`
+
+--
+
+95% confidence intervals for `\(p\)`: `$$\hat{p}\pm 1.96*\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$`
+
+---
+
+# Constructing 95% CIs
+
+For the Fox News poll:
+
+- `\(\hat{p}=0.50\)` (50% of the sample plan to vote for Biden)
+- `\(SE_{\hat{p}}=0.014\)`
+
+--
+
+Putting it together: `$$\hat{p}\pm 1.96*\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}=0.50\pm1.96*0.014=(0.473, 0.527)$$`
+
+--
+
+We are **95% confident** that between 47.3% and 52.7% of all registered voters will vote for Joe Biden in the 2020 presidential election. 
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-26-1.png" width="60%" /&gt;
+]
+
+---
+
+# 95% Confident?
+
+What does "95% confident" mean?
+
+- Suppose we took *many* `\(n=1343\)` polls of registered voters, and constructed a 95% confidence interval from each.
+    - **Approximately** 95% of the CIs would cover the *population parameter*.
+
+--
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-27-1.png" width="50%" /&gt;
+]
+
+---
+
+# Changing the Confidence Level
+
+95% is the most frequently-used **confidence level**.
+- But what if we wanted to change it to 99%?
+
+--
+
+It turns out that **99% of a Normal distribution** is contained within *2.58 standard deviations* from the mean. 
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-28-1.png" width="75%" /&gt;
+]
+
+--
+
+.pull-left[
+**95% confidence interval** `$$\text{point estimate} \pm1.96*SE$$`
+]
+
+.pull-right[
+**99% confidence interval** `$$\text{point estimate} \pm2.58*SE$$`
+]
+
+---
+
+# Finding 1.96 and 2.58 (in R)
+
+You can use `qnorm()` to find these *Normal quantiles* in R:
+
+.pull-left[
+
+```r
+qnorm(0.975) # For 95% CI
+```
+
+```
+## [1] 1.959964
+```
+
+```r
+qnorm(0.995) # For 99% CI
+```
+
+```
+## [1] 2.575829
+```
+]
+
+.pull-right[
+Or more generally:
+
+```r
+val = 1 - (1-0.95)/2 # For 95% CI
+qnorm(val)
+```
+
+```
+## [1] 1.959964
+```
+]
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-31-1.png" width="75%" /&gt;
+]
+
+---
+
+# Smaller sample size?
+
+What if a poll of `\(n=250\)` registered voters instead of `\(n=1343\)` found that 50% planned to vote Biden?
+
+--
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-32-1.png" width="60%" /&gt;
+]
+
+&lt;br&gt;
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-33-1.png" width="60%" /&gt;
+]
+
+---
+
+class: center, middle, frame
+
+# Interpreting Confidence Intervals
+
+---
+
+# Case Study
+
+In a [2013 Phase I trial](https://www.nejm.org/doi/pdf/10.1056/NEJMoa1302369), researchers found that 21/52 (40.4%) of advanced melanoma patients experienced an *immune response* to use of two concurrent treatments. 
+- `\(n=52\)`, `\(\hat{p}=0.404\)`
+
+--
+
+The **95% confidence interval** is (0.271, 0.537), or (27.1%, 53.7%). 
+- What does this mean?
+
+--
+
+We are **95% confident** that the population immune response proportion in patients with advanced melanoma is *between 27.1% and 53.7%*. 
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-34-1.png" width="60%" /&gt;
+]
+
+---
+
+# Interpreting CIs
+
+We are **95% confident** that the population immune response proportion in patients with advanced melanoma is *between 27.1% and 53.7%*. 
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-35-1.png" width="60%" /&gt;
+]
+
+What this interpretation *does*:
+
+- Makes a statement about the **population parameter**
+
+- Expresses **uncertainty**
+
+---
+
+# Interpreting CIs
+
+We are **95% confident** that the population immune response proportion in patients with advanced melanoma is *between 27.1% and 53.7%*. 
+
+.center[
+&lt;img src="05-Foundations_CI_files/figure-html/unnamed-chunk-36-1.png" width="60%" /&gt;
+]
+
+What this interpretation *does not do*:
+
+- Makes a *definitive* statement about the **population parameter**
+    - (we are not 100% confident)
+    
+- Makes a statement about *individual observations* or **point estimates**
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

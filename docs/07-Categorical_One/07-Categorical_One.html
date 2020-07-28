@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Inference for Categorical Data (One Group)
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Review of .display[Central Limit Theorem]
+    
+--
+
+## Confidence intervals for .display[single proportion]
+  
+--
+
+## Hypothesis testing for .display[single proportion]
+    
+---
+
+class: center, middle, frame
+
+# Central Limit Theorem
+
+---
+
+# Extrasensory Perception (ESP)
+
+One way to test for *extrasensory perception* (ESP) is with Zener cards. 
+
+- **five cards** with a *different symbol on each*
+
+.center[
+&lt;img src="esp.png" width="336" /&gt;
+]
+
+--
+
+**Question**: If there was **no such thing as ESP**, what *proportion* of guesses should be correct?
+
+---
+
+# Sampling Variability
+
+Suppose we play this game 50 times as a class. Our *proportion* of **correct guesses** is `$$\hat{p}=\frac{12}{50}=0.24$$`
+
+- Does this provide evidence that ESP is real?
+
+--
+
+**Remember**: Statistics **vary** *from sample to sample*!
+
+--
+
+- We *model* `\(\hat{p}\)` using the **Normal distribution**, provided:
+    - sample observations are **independent**
+    - sample size is **sufficiently large**
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-3-1.png" width="55%" /&gt;
+]
+
+---
+
+# A Note on Categorical Variables
+
+Whether one guesses a Zener card symbol **correctly** or **incorrectly** is a *categorical variable*. 
+
+Two outcomes: 
+
+1. **Correct**
+
+2. **Incorrect**
+
+
+```
+##  [1] "Incorrect" "Incorrect" "Incorrect" "Correct"   "Incorrect" "Incorrect"
+##  [7] "Incorrect" "Incorrect" "Incorrect" "Incorrect"
+```
+
+
+--
+
+The main *outcome of interest* is **Correct**. 
+
+- We'll refer to this as the "success". 
+
+---
+
+# Central Limit Theorem
+
+The **sampling distribution** of `\(\hat{p}\)` is **nearly Normal** when:
+
+1. Sample observations are **independent** (e.g., from a *random sample*).
+
+2. We can expect *at least* 10 "successes" and 10 "failures"
+    - Check `\(n\hat{p}\geq10\)` and `\(n(1-\hat{p})\geq10\)`
+    
+--
+
+When these conditions are met, we can estimate the **standard error** of `\(\hat{p}\)` with: `$$SE_{\hat{p}}=\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$`
+
+
+```r
+# ESP example
+sqrt(0.24*(1-0.24)/50)
+```
+
+```
+## [1] 0.06039868
+```
+
+---
+
+class: center, middle, frame
+
+# Confidence Intervals (for single proportion)
+
+---
+
+# Confidence Intervals
+
+Define `\(p\)` as the **population proportion** of correct Zener card guesses. 
+
+- This is *unknown*, but `\(\hat{p}=0.24\)` serves as a **point estimate**. 
+
+--
+
+A **confidence interval** represents a *range of plausible values* for `\(p\)`. 
+
+Using the **Normal distribution**:
+
+- `\(\hat{p}\pm z^{*}\times SE_{\hat{p}}\)`
+
+--
+
+The `\(z^{*}\)` value depends on the **confidence level**. 
+
+- 95% is the most common level. 
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-6-1.png" width="75%" /&gt;
+]
+
+---
+
+# Putting it all together
+
+For the ESP example:
+
+- `\(n=50\)`
+- `\(\hat{p}=12/50=0.24\)`
+    - 12 **successes**, 38 **failures**
+    
+(Is the sample *random*?)
+    
+--
+    
+- `\(SE_{\hat{p}}=0.06\)`
+
+--
+
+**95% confidence interval**
+
+
+```r
+0.24 - 1.96*0.06
+```
+
+```
+## [1] 0.1224
+```
+
+```r
+0.24 + 1.96*0.06
+```
+
+```
+## [1] 0.3576
+```
+
+--
+
+**Interpretation**: We are *95% confident* that the *population proportion* of correct Zener card guesses is between 12.2% and 35.8%. 
+
+---
+
+# Changing Confidence Level
+
+What if we want to be **more confident** in capturing the population proportion in our interval?
+
+- Wider interval?
+- Smaller interval?
+
+--
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-8-1.png" width="75%" /&gt;
+]
+
+--
+
+**99% confidence interval**
+
+
+```r
+c(0.24 - 2.58*0.06, 0.24 + 2.58*0.06)
+```
+
+```
+## [1] 0.0852 0.3948
+```
+
+---
+
+# Changing Confidence Level
+
+What if we want to be **more confident** in capturing the population proportion in our interval?
+
+- Wider interval?
+- Smaller interval?
+
+--
+
+.pull-left[
+![](07-Categorical_One_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+You can use `qnorm()` to find these *Normal quantiles* in R:
+
+
+```r
+val = 1 - (1-0.90)/2 # For 90% CI
+qnorm(val)
+```
+
+```
+## [1] 1.644854
+```
+]
+
+--
+
+**90% confidence interval**
+
+
+```r
+c(0.24 - 1.645*0.06, 0.24 + 1.645*0.06)
+```
+
+```
+## [1] 0.1413 0.3387
+```
+
+---
+
+# Changing Sample Size
+
+What if we kept the **confidence level** at 95%, but *increased the sample size* from 50 to 250?
+- We'll keep `\(\hat{p}\)` the same, `\(60/250=0.24\)`
+
+--
+
+- The *only thing* that would change is the **standard error**: `$$SE_{\hat{p}}=\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$`
+
+
+```r
+sqrt(0.24*(1-0.24)/250)
+```
+
+```
+## [1] 0.02701111
+```
+
+--
+
+**95% Confidence Interval** (with larger *sample size*):
+
+
+```r
+c(0.24 - 1.96*0.027, 0.24 + 1.96*0.027)
+```
+
+```
+## [1] 0.18708 0.29292
+```
+
+---
+
+# Recap
+
+**90% Confidence Interval**, `\(n=50\)`
+
+
+```r
+c(0.24 - 1.645*0.06, 0.24 + 1.645*0.06)
+```
+
+```
+## [1] 0.1413 0.3387
+```
+
+**95% Confidence Interval**, `\(n=50\)`
+
+
+```r
+c(0.24 - 1.96*0.06, 0.24 + 1.96*0.06)
+```
+
+```
+## [1] 0.1224 0.3576
+```
+
+**99% Confidence Interval**, `\(n=50\)`
+
+
+```r
+c(0.24 - 2.58*0.06, 0.24 + 2.58*0.06)
+```
+
+```
+## [1] 0.0852 0.3948
+```
+
+
+---
+
+# Recap
+
+**95% Confidence Interval**, `\(n=50\)`
+
+
+```r
+c(0.24 - 1.96*0.06, 0.24 + 1.96*0.06)
+```
+
+```
+## [1] 0.1224 0.3576
+```
+
+**95% Confidence Interval**, `\(n=250\)`
+
+
+```r
+c(0.24 - 1.96*0.027, 0.24 + 1.96*0.027)
+```
+
+```
+## [1] 0.18708 0.29292
+```
+
+**95% Confidence Interval**, `\(n=1000\)`
+
+
+```r
+c(0.24 - 1.96*0.014, 0.24 + 1.96*0.014)
+```
+
+```
+## [1] 0.21256 0.26744
+```
+
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing (for single proportion)
+
+---
+
+# Competing Hypotheses
+
+**Recall**: Statistical hypothesis testing involves two competing claims about the *population*:
+
+- `\(H_{0}\)` (**Null** hypothesis): position of *no difference*
+
+- `\(H_{A}\)` (**Alternative** hypothesis): usually a *new* or *stronger* perspective
+
+--
+
+**ESP Example**:
+
+- `\(H_{0}: p=1/5=0.20\)`
+    - There is no such thing as ESP - your chances of guessing a card symbol correctly are *entirely random*.
+
+- `\(H_{A}: p&gt;0.20\)`
+    - There is some evidence that some might be able to guess a card symbol correctly at a rate *higher than random*. 
+    
+--
+
+We'll play the role of the **skeptic**. Assume `\(H_{0}\)` until there is *convincing evidence* that it is false. 
+
+---
+
+# Assuming the Null
+
+By initially assuming the *null hypothesis*, we are assuming the following:
+
+- `\(p=p_{0}=0.20\)`
+
+- `\(SD(\hat{p})=\sqrt{p(1-p)/n}=0.057\)`, using `\(n=50\)`
+
+--
+
+By the **CLT**, the distribution of `\(\hat{p}\)` under the *null hypothesis* is **Normal**:
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-21-1.png" width="65%" /&gt;
+]
+
+---
+
+# Judging Evidence
+
+Our "evidence":
+
+- One sample of `\(n=50\)`, with `\(\hat{p}=0.24\)`
+
+--
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-22-1.png" width="65%" /&gt;
+]
+
+Is our "evidence" a *rare event* in this distribution?
+
+--
+
+- What is the **probability** of `\(\hat{p}\)` being *greater* than 0.24 in this distribution?
+
+---
+
+# Reviewing pnorm()
+
+The `pnorm()` R function gives Normal **tail areas**. This is what we need!
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-23-1.png" width="55%" /&gt;
+]
+
+--
+
+In this distribution: `mean = 0.2`, `sd = 0.057` (calculated earlier)
+
+
+```r
+1 - pnorm(0.24, mean = 0.2, sd = 0.057)
+```
+
+```
+## [1] 0.2414162
+```
+
+- **Note**: Using `1-pnorm()` gives the **upper** Normal tail area. 
+
+---
+
+# p-value
+
+
+```r
+1 - pnorm(0.24, mean = 0.2, sd = 0.057)
+```
+
+```
+## [1] 0.2414162
+```
+
+There is a 24% chance of observing data *more extreme* than `\(\hat{p}=0.24\)`, **in a world where the null hypothesis is true**. 
+
+--
+
+- That's the **p-value**!
+    - Because p-value `\(&gt;0.05\)`, **we fail to reject** the null hypothesis. 
+
+--
+
+We also have the **95% confidence interval** from before:
+
+
+```r
+c(0.24 - 1.96*0.06, 0.24 + 1.96*0.06)
+```
+
+```
+## [1] 0.1224 0.3576
+```
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-27-1.png" width="60%" /&gt;
+]
+
+---
+
+# Test Statistic
+
+We typically **standardize** our "evidence" to the **standard Normal** scale. 
+
+The **test statistic**, `\(Z\)`, is a `\(z\)`-score: `$$Z=\frac{\text{point estimate} - \text{null value}}{SD(\hat{p})} = \frac{0.24-0.20}{0.057} = 0.702$$`
+
+--
+
+
+```r
+Z = (0.24-0.20)/sqrt(0.20*(1-0.20)/50)
+Z
+```
+
+```
+## [1] 0.7071068
+```
+
+--
+
+.pull-left[
+![](07-Categorical_One_files/figure-html/unnamed-chunk-29-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](07-Categorical_One_files/figure-html/unnamed-chunk-30-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Test Statistic
+
+.center[
+&lt;img src="07-Categorical_One_files/figure-html/unnamed-chunk-31-1.png" width="65%" /&gt;
+]
+
+**p-value** (with `mean = 0` and `sd = 1`)
+
+
+```r
+1 - pnorm(0.702)
+```
+
+```
+## [1] 0.2413396
+```
+
+--
+
+**Conclusion**: *Fail to reject* `\(H_{0}\)`. Not enough evidence to conclude that ESP is real.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

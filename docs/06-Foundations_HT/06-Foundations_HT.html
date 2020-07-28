@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Foundations of Inference (Hypothesis Testing)
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## .display[Hypothesis testing] framework
+    
+--
+
+## Relationship between hypothesis testing and .display[confidence intervals]
+    
+--
+
+## Decision .display[errors]
+
+--
+
+##Formal testing using .display[p-values]
+    
+---
+
+class: center, middle, frame
+
+# Hypothesis Testing Framework
+
+---
+
+# Case Study: Sleep and Memory
+
+
+
+[Mednick et al. (2008)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2603066/pdf/nihms65981.pdf): 24 adults given lists of 24 words to memorize. Afterwards, the adults were *randomized* to one of two groups:
+- **Group 1**: took 90-minute nap
+- **Group 2**: stayed awake and given a caffeine pill
+
+--
+
+.pull-left[
+**Results**
+
+
+```r
+mean(Words ~ Group, data = Sleep)
+```
+
+```
+## Caffeine    Sleep 
+##    12.25    15.25
+```
+
+- Sleep group had higher **mean word recall**. 
+]
+
+.pull-right[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Observed Statistic
+
+The **observed statistic** (or *point estimate*) is `\(\bar{x}_{\text{sleep}}-\bar{x}_{\text{caff}}=3\)`. 
+
+- Is this difference *large enough* to conclude that sleep is associated with improved memory, or is it simply **due to chance**?
+
+--
+
+In other words, we're testing **two competing claims**:
+
+- `\(H_{0}\)` (**null hypothesis**): Sleep and memory are *independent* 
+    - The difference in means was **due to chance**. 
+
+--
+
+- `\(H_{A}\)` (**alternative hypothesis**): Sleep is **associated** with improved memory. 
+    - The difference in means was *not* **due to chance**. 
+    
+---
+
+# Null Hypothesis
+
+What would it mean if the **null hypothesis**, which claims that sleep and memory are independent, is *true*?
+
+- The **results** were due to the way that the study participants were *shuffled* into groups. 
+    
+--
+
+**Question**: How do we choose between `\(H_{0}\)` (*null*) and `\(H_{A}\)` (*alternative*)? 🤔🤔🤔
+
+- We'll see if the results conflict *so much* with `\(H_{0}\)` that `\(H_{0}\)` cannot possibly be true. 
+
+---
+
+# Simulating the Null
+
+Suppose that sleep and memory are *independent*. 
+
+- If we repeat the study with a different *random grouping* of subjects, the results would be due to **random chance**. 
+
+--
+
+Here are the study results (number of words memorized), without groups:
+
+
+```
+##  [1] 14 18 11 13 18 17 21  9 16 17 14 15 12 12 14 13  6 18 14 16 10  7 15 10
+```
+
+--
+
+Here is a **difference in means** if we *randomly shuffled* the results into the *Sleep* and *Caffeine* groups:
+
+
+```r
+diffmean(Words ~ shuffle(Group), data = Sleep)
+```
+
+```
+##   diffmean 
+## -0.3333333
+```
+
+- The "Sleep group" memorized 0.33 *fewer* words, **on average**. 
+
+---
+
+# More Shuffling
+
+To simulate a **world where the null hypothesis is true**, we'll need to shuffle a few more times...
+
+--
+
+
+```r
+diffmean(Words ~ shuffle(Group), data = Sleep)
+```
+
+```
+##   diffmean 
+## -0.6666667
+```
+
+--
+
+
+```r
+diffmean(Words ~ shuffle(Group), data = Sleep)
+```
+
+```
+##  diffmean 
+## -2.166667
+```
+
+--
+
+
+```r
+diffmean(Words ~ shuffle(Group), data = Sleep)
+```
+
+```
+## diffmean 
+##     -2.5
+```
+
+--
+
+
+```r
+diffmean(Words ~ shuffle(Group), data = Sleep)
+```
+
+```
+##  diffmean 
+## 0.8333333
+```
+
+---
+
+# The Null Distribution
+
+We repeat *shuffling* and calculating the *difference in means* between the *sleep* and *caffeine* groups to obtain a **null distribution**. 
+
+.pull-left[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+- Centered at **zero**
+
+- Approximately **Normal**
+
+In 1,000 simulations, 28 (2.8%) yielded a *point estimate* `\(\geq3\)`. 
+]
+
+---
+
+# What do we conclude?
+
+.center[
+&lt;img src="06-Foundations_HT_files/figure-html/unnamed-chunk-12-1.png" width="40%" /&gt;
+]
+
+[Mednick et al. (2008)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2603066/pdf/nihms65981.pdf) found that those in the *Sleep* group memorized **3** more words than the *Caffeine* group, **on average**. 
+
+- If there was *truly no relationship* between sleep and memory, then the **actual study results** would occur approximately 2.8% of the time. 
+
+--
+
+Thus, conclude that the null hypothesis cannot possibly be true!
+- Reject the null in favor of the **alternative**. 
+
+---
+
+class: center, middle, frame
+
+# Testing Hypotheses using Confidence Intervals
+
+---
+
+# Confidence Intervals
+
+[Mednick et al. (2008)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2603066/pdf/nihms65981.pdf): 24 adults given lists of 24 words to memorize. Afterwards, the adults were *randomized* to one of two groups:
+- **Group 1**: took 90-minute nap
+- **Group 2**: stayed awake and given a caffeine pill
+
+**Results**: The *Sleep* group memorized **three more words** than the *Caffeine* group, *on average*. 
+
+--
+
+*It turns out...*
+- A 95% confidence interval for the **difference in mean** word recall between the two groups is (0.1, 5.9). 
+
+.center[
+&lt;img src="06-Foundations_HT_files/figure-html/unnamed-chunk-13-1.png" width="60%" /&gt;
+]
+
+---
+
+# Interprting Confidence Intervals
+
+We are **95% confident** that those who take a 90-min nap will remember an average of *between 0.1 and 5.9 more words* than those who skip the nap and consume caffeine. 
+
+.center[
+&lt;img src="06-Foundations_HT_files/figure-html/unnamed-chunk-14-1.png" width="60%" /&gt;
+]
+
+--
+
+**What does this really mean?**
+
+- A CI is a *range of plausible values* for the **population parameter**. 
+    - Is **zero** a *plausible value* based on this CI?
+    
+--
+
+We can say that **zero** is *implausible* (with 95% confidence) as the **true difference in mean word recall**. 
+- (**Reject** the null hypothesis)
+
+---
+
+# Another Confidence Interval
+
+[Fox News general election poll (June 18, 2020)](https://static.foxnews.com/foxnews.com/content/uploads/2020/06/Fox_June-13-16-2020_National_Topline_June-18-Release.pdf): `\(n=1343\)` *registered voters*
+
+- Biden: 50%
+
+--
+
+Does this sample provide **convincing evidence** that *more* registered voters will vote for Biden than for Hillary Clinton in 2016 (48%)?
+
+- `\(H_{0}: p=0.48\)` versus `\(H_{A}: p&gt;0.48\)`
+
+--
+
+.center[
+&lt;img src="06-Foundations_HT_files/figure-html/unnamed-chunk-15-1.png" width="60%" /&gt;
+]
+
+--
+
+We are **95% confident** that between 47.3% and 52.7% of all registered voters will vote for Joe Biden in the 2020 presidential election. 
+
+- 48% falls in this range! We *cannot* say that this value is *implausible*. 
+    - (**Fail to reject** the null hypothesis)
+
+---
+
+class: center, middle, frame
+
+# Decision Errors
+
+---
+
+# Errors in Hypothesis Testing
+
+Two possible conclusions in a statistical hypothesis test:
+- **Reject** the null hypothesis
+- **Fail to reject** the null hypothesis
+
+It is *no guarantee* that the conclusion you reach is correct!
+
+--
+
+.center[
+&lt;img src="decision_errors.png" width="495" /&gt;
+]
+
+- **Type I Error**: Reject `\(H_{0}\)` when `\(H_{0}\)` is *actually* **true**. 
+
+- **Type II Error**: Fail to reject `\(H_{0}\)` when `\(H_{0}\)` is *actually* **false**.
+
+---
+
+# Type I Error
+
+**Example**: *Incorrectly conclude* that Joe Biden will receive a higher percentage of votes than Hilary Clinton in 2016 (48%). 
+
+- But... we do not reject `\(H_{0}\)` unless we have **strong evidence**. 😅😅😅
+
+--
+
+**Rule of thumb**: We generally do not want to *incorrectly reject* the `\(H_{0}\)` more than **5%** of the time.
+
+- This 5% cutoff is called the **significance level**, denoted by `\(\alpha\)` ("alpha")
+
+--
+
+Also connects back to **confidence intervals**:
+
+.pull-left[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+
+---
+
+class: center, middle, frame
+
+# Formal Testing using p-values
+
+---
+
+# Simulating the Null
+
+Suppose that sleep and memory are *independent*. 
+
+- If we repeat the study with a different *random grouping* of subjects, the results would be due to **random chance**. 
+
+.pull-left[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+In 1,000 simulations, 28 (2.8%) yielded a *point estimate* `\(\geq3\)`. 
+]
+
+---
+
+# p-values
+
+The 2.8% (reported in *decimal form* as 0.028) is the **p-value**. 
+
+- **p-value**: The probability of observing data *more extreme than yours*, **in a world where the null hypothesis is true**.
+
+--
+
+In 1,000 simulations with the *sleep and memory* data, 2.8% yielded data *more extreme than observed* (difference in means of **3**). 
+
+.center[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Using the p-value
+
+Compare to the **significance level**, `\(\alpha\)`.  
+
+- If p-value `\(&lt;\alpha\)`, **reject the null hypothesis**. 
+- If p-value `\(\geq\alpha\)`, **fail to reject the null hypothesis**. 
+
+(Always describe the conclusion in *context of the data*!!!)
+
+&lt;br&gt;
+
+--
+
+**Sleep and memory study**, [(Mednick et al., 2008)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2603066/pdf/nihms65981.pdf): p-value `\(=0.028&lt;0.05\)`
+
+- **Decision**: *Reject the null hypothesis*. 
+
+--
+
+- **Conclusion**: Naps were associated with a significantly enhanced recall of words, *compared to caffeine intake*. 
+
+---
+
+# Significance Level and p-value
+
+You may change the **significance level** depending on the *consequences* of **Type I Error**. 
+
+- The *most common* level is `\(\alpha=0.05\)`. 
+
+**But**... what if we changed `\(\alpha\)` to 0.01?
+
+&lt;br&gt;
+
+--
+
+**Sleep and memory study**, [(Mednick et al., 2008)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2603066/pdf/nihms65981.pdf): p-value `\(=0.028&gt;0.01\)`
+
+- **Decision**: *Fail to reject the null hypothesis*. 
+
+- **Conclusion**: There is **not enough statistical evidence** to conclude that naps were associated with a significantly enhanced recall of words, *relative to caffeine intake*. 
+
+---
+
+# Forming Conclusions with the p-value
+
+Science isn't as simple as a *binary* **reject** vs. **fail to reject**. 
+
+- We have much more information at our disposal!
+
+--
+
+1. `\(n=24\)` (12 participants *randomized* to each group)
+    - Small sample, more *uncertainty*!
+    
+2. **Confidence intervals** give *more* (and *clearer*) information than the p-value alone!
+
+--
+
+.center[
+&lt;img src="06-Foundations_HT_files/figure-html/unnamed-chunk-21-1.png" width="60%" /&gt;
+]
+
+---
+
+# Forming Conclusions with the p-value
+
+Science isn't as simple as a *binary* **reject** vs. **fail to reject**. 
+
+- We have much more information at our disposal!
+
+&lt;ol start="3"&gt;
+    &lt;li&gt;&lt;b&gt;Data visualization&lt;/b&gt; is a valuable tool!&lt;/li&gt;
+&lt;/ol&gt;
+
+.pull-left[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](06-Foundations_HT_files/figure-html/unnamed-chunk-23-1.png)&lt;!-- --&gt;
+]
+
+&lt;script&gt;
+$("#foo ol").attr('start', 3)
+&lt;/script&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
