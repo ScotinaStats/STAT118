@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## The Normal Distribution
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## The .display[Normal] model
+    
+--
+
+## .display[Z]-scores
+    
+--
+
+## Normal .display[probabilities]
+
+--
+
+## .display[68-95-99.7] Rule
+    
+---
+
+class: center, middle, frame
+
+# The Normal Model
+
+---
+
+# What is it?
+
+.center[
+&lt;img src="normal_curve.png" width="624" /&gt;
+]
+
+--
+
+- **unimodal**, **symmetric**
+
+- **bell-shaped**
+
+- Area under the Normal curve **adds up to 1**
+
+- Arises in **many applications**
+
+--
+
+.center[
+Completely determined by its **mean** (&amp;mu;) and **standard deviation** (&amp;sigma;)
+]
+
+---
+
+# Different Normal Distributions
+
+.pull-left[
+![](04-Normal_Distribution_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+- N(mean = 100, sd = 15)
+]
+
+--
+
+.pull-right[
+![](04-Normal_Distribution_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+- N(mean = 0, sd = 1)
+- **Standard Normal distribution**
+]
+
+---
+
+# Different Normal Distributions
+
+.center[
+&lt;img src="04-Normal_Distribution_files/figure-html/unnamed-chunk-5-1.png" width="65%" /&gt;
+
+]
+
+---
+
+# Cheese Truck Example
+
+In September 2019, a big rig carrying *20,000 pounds of cheese* overturned on I-5 in California ([source](https://sacramento.cbslocal.com/2019/09/25/hood-franklin-road-big-rig-crash-elk-grove/)). 
+- Traveling 81 miles per hour
+
+--
+
+*Suppose*: The **distribution** of all vehicle speeds traveling on I-5 is *Normal*...
+- **Mean**: 72 miles per hour
+- **Standard deviation**: 9 miles per hour
+
+--
+
+.center[
+&lt;img src="04-Normal_Distribution_files/figure-html/unnamed-chunk-6-1.png" width="35%" /&gt;
+]
+
+---
+
+# Random Suburban Street Example
+
+Vehicle speeds while traveling down the quiet, suburban *Random St* are known to *also* follow a *Normal* distribution, with...
+- **Mean**: 27 miles per hour
+- **Standard deviation**: 2 miles per hour
+
+--
+
+On a beautiful Monday morning, a resident observed a vehicle traveling down *Random St* at a speed of 31 miles per hour!
+
+--
+
+.center[
+&lt;img src="04-Normal_Distribution_files/figure-html/unnamed-chunk-7-1.png" width="35%" /&gt;
+]
+
+- Which vehicle traveled faster, *relative to its respective distribution*?
+
+---
+
+class: center, middle, frame
+
+# Standardizing with Z-scores
+
+---
+
+# Comparing Normal Distributions
+
+.pull-left[
+![](04-Normal_Distribution_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](04-Normal_Distribution_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.center[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; sd &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; I-5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 72 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Random St &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+---
+
+# Standard Deviation as a Ruler
+
+Using the **standard deviation** as a *guide*...
+
+- The cheese truck was traveling *1 standard deviation* faster than average.
+
+- The Random St vehicle was traveling *2 standard deviations* faster than average.
+
+--
+
+We just calculated and compared two **Z-scores**!
+
+- *Technically* speaking... `$$z=\frac{x-\mu}{\sigma}$$`
+    - *x*: individual *observation*
+    - `\(\mu\)`: the population **mean**
+    - `\(\sigma\)`: the population **standard deviation**
+    
+--
+
+- *Conceptually* speaking...
+    - The Z-score is the *number of standard deviations* an observation falls *above or below* the mean. 
+    
+---
+
+# Visualizing Z-scores
+
+.center[
+&lt;img src="04-Normal_Distribution_files/figure-html/unnamed-chunk-11-1.png" width="65%" /&gt;
+]
+
+---
+
+class: center, middle, frame
+
+# Finding Normal Probabilities (Tail Areas)
+
+---
+
+# Tail Areas
+
+**Tail areas** of distributions play a vital role in statistics. 
+
+- What fraction of test takers scored above 1500 on the SAT?
+
+--
+
+- What proportion of vehicles traveled faster on I-5 than the cheese truck?
+
+--
+
+- What percent of Heinz ketchup bottles pass inspection?!
+
+--
+
+At the *Heinz ketchup factory*, amounts which go into bottles of ketchup are *nearly Normally distributed*. 
+- **Mean**: 36 ounces
+- **Standard deviation**: 0.11 ounces
+
+--
+
+**Question**: Approximately what proportion of bottles contain *less than* 35.8 ounces?
+
+---
+
+# Normal Tail Areas
+
+**Given**: Ketchup bottle amounts follow a N(36, 0.11) distribution. 
+
+- **Find**: Proportion of bottle amounts **below** 35.8 ounces. 
+
+.center[
+&lt;img src="ketchup_left358.png" width="35%" /&gt;
+]
+
+--
+
+**In R**: We'll use `pnorm()` to find tail areas for the **Normal** distribution. 
+- In `pnorm()`, you *must* specify:
+    - (i) The observation/cutoff of interest (35.8 in this example)
+    - (ii) the `mean` and `sd`. 
+
+--
+
+
+```r
+pnorm(35.8, mean = 36, sd = 0.11)
+```
+
+```
+## [1] 0.03451817
+```
+
+---
+
+# pnorm()
+
+.center[
+&lt;img src="ketchup_left358.png" width="35%" /&gt;
+]
+
+
+```r
+pnorm(35.8, mean = 36, sd = 0.11)
+```
+
+```
+## [1] 0.03451817
+```
+
+- By default, `pnorm()` calculates the tail area **to the left** of the cutoff point!
+
+**Conclusion**: Approximately 3.45% of Heinz ketchup bottles contain *less than* 35.8 ounces. 
+
+--
+
+**Think about this**
+
+- If the area under the Normal curve **adds to 1**, how could you find the tail area **to the right** of 35.8?
+
+---
+
+# Ketchup, continued
+
+Why did we calculate the tail area to the left of **35.8 ounces**?
+
+- Turns out, the ketchup bottle fails quality control inspection if the amount is *below* 35.8 ounces or *above* 36.2 ounces. 
+
+.center[
+**What percent of bottles pass inspection?**
+]
+
+--
+
+.center[
+&lt;img src="ketchup_between.png" width="35%" /&gt;
+]
+
+---
+
+# Ketchup, continued
+
+Why did we calculate the tail area to the left of **35.8 ounces**?
+
+- Turns out, the ketchup bottle fails quality control inspection if the amount is *below* 35.8 ounces or *above* 36.2 ounces. 
+
+.center[
+**What percent of bottles pass inspection?**
+]
+
+.center[
+&lt;img src="ketchup_math.png" width="720" /&gt;
+]
+
+--
+
+**In R**: 
+
+
+```r
+pnorm(36.2, mean = 36, sd = 0.11) - pnorm(35.8, mean = 36, sd = 0.11)
+```
+
+```
+## [1] 0.9309637
+```
+
+--
+
+**Conclusion**: Approximately 93.1% of Heinz ketchup bottles pass inspection. 
+
+---
+
+# Working "Backwards"
+
+.center[
+&lt;img src="temp_low3.png" width="35%" /&gt;
+]
+
+**Human body temperatures**, in degrees F: N(mean = 98.2, sd = 0.7)
+
+- What is the *cutoff* for the **lowest 3%** of human body temperatures?
+
+---
+
+# qnorm()
+
+If we're *given* a **tail area** (0.03) and need to find a *cutoff* (or a **percentile**) in a Normal distribution, use `qnorm()`:
+
+
+```r
+qnorm(0.03, mean = 98.2, sd = 0.7)
+```
+
+```
+## [1] 96.88344
+```
+
+--
+
+`qnorm()` works similarly to `pnorm()`: You *must* specify the **mean** and **sd**
+
+- **But**, enter the **left tail area** first, **not** the observation. 
+
+--
+
+&lt;br&gt;
+
+**Conclusion**: About 3% of humans have body temperatures *lower than* **96.9 degrees F**. 
+
+---
+
+# qnorm()
+
+**Question**: How could we find the cutoff for the **top** 10% of human body temperatures?
+
+.center[
+&lt;img src="temp_high10.png" width="35%" /&gt;
+]
+
+--
+
+
+```r
+qnorm(0.90, mean = 98.2, sd = 0.7)
+```
+
+```
+## [1] 99.09709
+```
+
+---
+
+class: center, middle, frame 
+
+# The 68-95-99.7 Rule
+
+---
+
+# A quick "rule of thumb"
+
+The **68-95-99.7 Rule** provides a quick way to calculate **Normal distribution** probabilities for observations with specific Z-scores. 
+
+- In order words, the *probability* of falling **within** 1, 2, or 3 standard deviations of the mean
+
+.center[
+&lt;img src="68_95_99_z.png" width="432" /&gt;
+]
+
+--
+
+Would this work for the Heinz ketchup example? (using observation of **35.8** oz)
+
+---
+
+# The 68-95-99.7 Rule
+
+.center[
+&lt;img src="68_95_99_z.png" width="432" /&gt;
+]
+
+Using `\(\mu=36\)` (mean) and `\(\sigma=0.11\)` (sd) from the Heinz ketchup example, `$$Z_{35.8}=\frac{35.8-36}{0.11}=-1.82$$`
+
+--
+
+**In R**:
+
+
+```r
+(35.8 - 36)/0.11
+```
+
+```
+## [1] -1.818182
+```
+
+---
+
+# The 68-95-99.7 Rule
+
+.center[
+&lt;img src="68_95_99_z.png" width="432" /&gt;
+]
+
+Using `\(\mu=36\)` (mean) and `\(\sigma=0.11\)` (sd) from the Heinz ketchup example...
+
+- (*Approximately*) **68%** of the bottle amounts are between...  
+    - `\(36-0.11=\)` **35.89** and `\(36+0.11=\)` **36.11** ounces
+
+- (*Approximately*) 95% of the bottle amounts are between... 
+    - `\(36-(2*0.11)=\)` **35.78** and `\(36+(2*0.11)=\)` **36.22** ounces
+
+---
+
+# Verifying the 68-95-99.7 Rule (in R)
+
+.center[
+&lt;img src="68_95_99_z.png" width="432" /&gt;
+]
+
+How can we use R to calculate the area **between** -1 and 1?
+
+- Note that this is a **standard Normal** N(0, 1) distribution!
+
+--
+
+
+```r
+pnorm(1, mean = 0, sd = 1) - pnorm(-1, mean = 0, sd = 1)
+```
+
+```
+## [1] 0.6826895
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

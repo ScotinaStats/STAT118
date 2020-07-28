@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Summarizing Data
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## Examining .display[numerical] data
+    
+--
+
+## Measures of .display[center] and .display[spread]
+    
+--
+
+## .display[Robust] statistics
+
+--
+
+## Examining .display[categorical] data
+
+---
+
+class: center, middle, frame
+
+# Examining Numerical Data
+
+---
+
+# Data Visualization: What is it?
+
+&gt; "The simple graph has brought more information to the data analyst’s mind 
+&gt; than any other device." -- John Tukey
+
+**What information?**
+
+- presence of **outliers**
+
+- **distributions** (of individual variables)
+
+- **relationships** (between groups of variables)
+
+--
+
+.center[
+**Patterns** in data!
+]
+
+---
+
+# Scatterplots
+
+
+
+**Relationship** between TWO *numerical* variables
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-3-1.png" width="55%" /&gt;
+]
+
+- *Direction* of relationship? *Strength*? *Form*?
+
+---
+
+# Scatterplots
+
+**Relationship** between TWO *numerical* variables (and *one categorical variable*)
+
+.center[
+&lt;img src="spotify_scatter.jpeg" width="525" /&gt;
+]
+
+- *Direction* of relationship? *Strength*? *Form*?
+
+---
+
+# Histograms
+
+In a **histogram**, observations are grouped into *bins* and plotted as bars. 
+
+.pull-left[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+**Histograms** share the following information:
+
+- What is the *range* of prices?
+
+- What is the *typical* or *expected* price for an Airbnb?
+
+- What are frequent and infrequent values?
+
+- Is there any skewness?
+]
+
+--
+
+**What do we notice?**
+
+---
+
+# Histograms
+
+[Study on factors associated with muscle size](https://pubmed.ncbi.nlm.nih.gov/24455711/)
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-6-1.png" width="45%" /&gt;
+]
+
+**What do we notice?**
+
+--
+
+- *symmetric* 
+
+- *prominent peak* between 65 and 70 inches
+
+- some *variability*
+
+---
+
+# Histograms and Shape
+
+In addition to looking at whether a histogram is **skewed** or **symmetric**, we can also identify **modality**, or the presence of *prominent peaks*. 
+
+.center[
+&lt;img src="histograms_modality.png" width="640" /&gt;
+]
+
+--
+
+You may describe a distribution's *modality* as:
+- **unimodal**
+- **bimodal**
+- **multimodal**
+- **uniform**
+
+---
+
+class: center, middle, frame
+
+# Measures of Center and Spread
+
+---
+
+# Mean
+
+The **mean**, or the *average*, is a common way to measure the **center** of a distribution. 
+
+- The **sample mean** is often labeled as `\(\bar{x}\)`: `$$\bar{x}=\frac{x_{1}+x_{2}+\cdots+x_{n}}{n}$$`
+
+- Each of `\(x_{1}\)`, `\(x_{2}\)`, ... are individual *cases* in a dataset, and `\(n\)` is the **sample size**.. 
+
+--
+
+**In R**:
+
+
+```r
+library(mosaic) # Load this first!
+mean( ~ price, data = airbnb_boston)
+```
+
+```
+## [1] 163.5201
+```
+
+---
+
+# Standard Deviation (and Variance)
+
+The **mean** is useful in describing the *center* of a distribution. 
+
+- But what about the **spread**?
+
+--
+
+**Standard Deviation**: A measure that represents the typical deviation of observations away from the mean. 
+- Also the *square root* of the **variance**. 
+
+--
+
+The **sample standard deviation**, `\(s\)`, is calculated by: `$$s=\sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_{i}-\bar{x})^{2}}$$`
+
+---
+
+# Standard Deviation (in R)
+
+This is much easier than calculating `\(s\)` by hand!
+
+
+```r
+sd( ~ price, data = airbnb_boston)
+```
+
+```
+## [1] 140.8283
+```
+
+--
+
+**Interpretation**: The price per night of Boston Airbnbs typically *deviate* from the mean (&amp;#36;163.46) by about &amp;#36;140.51. 
+
+--
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-10-1.png" width="40%" /&gt;
+]
+
+---
+
+# Boxplots
+
+A **boxplot** summarizes a dataset using *five statistics*:
+
+- **minimum**
+- **first quartile (Q1)** (25th *percentile*: 25% of observations fall below Q1)
+- **median** (50th *percentile*)
+- **third quartile (Q3)** (75th *percentile*)
+- **maximum**
+
+--
+
+.pull-left[
+&lt;img src="boxplot_layout.png" width="616" /&gt;
+]
+
+.pull-right[
+*Width of box* represents **interquartile range** (IQR)
+- IQR `\(=\)` Q3 `\(-\)` Q1
+
+**Whiskers**: Extend to...
+- Q3 `\(+1.5\times\)` IQR
+- Q1 `\(-1.5\times\)` IQR
+]
+
+---
+
+# Constructing Boxplots
+
+**Boston Airbnb data**
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-12-1.png" width="45%" /&gt;
+]
+
+
+```r
+favstats( ~ price, data = airbnb_boston)
+```
+
+```
+##  min Q1 median  Q3  max     mean       sd    n missing
+##    0 80    133 199 2000 163.5201 140.8283 2980       0
+```
+
+---
+
+# Comparing Boxplots and Histograms
+
+.pull-left[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Side-by-side Boxplots
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-16-1.png" width="65%" /&gt;
+
+]
+
+---
+
+class: center, middle, frame
+
+# Robust Statistics
+
+---
+
+# Outliers
+
+Suppose we replaced the **minimum** household income in this sample (&amp;#36;12,000) with &amp;#36;10 million. 
+- How would sample statistics such as the *mean*, *median*, *standard deviation*, and *IQR* be affected?
+
+
+
+.pull-left[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Outliers
+
+
+
+.pull-left[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# What happened?
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; median &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; IQR &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; mean &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; s &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Original Data &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 190 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 200 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 245 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 226 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Replace min with $10 million &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 200 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 200 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 316 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 854 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+--
+
+The *median* and *IQR* are called **robust statistics**. 
+- Extreme observations have very little influence on their values. 
+
+--
+
+If a distribution is **skewed**, then the *median* and *IQR* are often more helpful in describing the *center* and *spread*, respectively. 
+
+---
+
+# Illustration
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-24-1.png" width="65%" /&gt;
+]
+
+---
+
+# Illustration
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-25-1.png" width="65%" /&gt;
+]
+
+---
+
+# Illustration
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-26-1.png" width="65%" /&gt;
+]
+
+---
+
+class: center, middle, frame
+
+# Examining Categorical Data
+
+---
+
+# Contingency Tables
+
+[Are SSRIs associated with increased risk of bone fractures among the elderly?](https://www.mcgill.ca/channels/news/new-muhc-study-shows-increased-risk-bone-fracture-elderly-people-daily-medication-depression-23574)
+
+- `\(n=5008\)` adults over the age of 50, followed for five years
+- **observational study**
+
+--
+
+**Study Results**
+
+.center[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Taking SSRI &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; No SSRI &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Total &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Experiences Fractures &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 14 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 244 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 258 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No Fractures &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 123 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4627 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4750 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Total &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 137 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4871 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5008 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+--
+
+This display is called a **contingency table**. 
+
+- *Two* categorical variables: `fracture` (Yes vs. No) and `treatment` (SSRI vs. No SSRI)
+    - **Example**: Of the 137 patients *taking an SSRI*, 14 (10.2%) *experienced fractures*. 
+    
+---
+
+# Barplots
+
+A **barplot** is a common way to display one or more *categorical variables*. 
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-28-1.png" width="65%" /&gt;
+]
+
+---
+
+# Row and Column Proportions
+
+But does the *single variable* barplot help us determine relationships between *two* variables?
+- No!
+
+**Row** and **column proportions** give a *fractional breakdown* of one variable in another. 
+
+--
+
+**Row Proportions**
+
+.center[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Taking SSRI &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; No SSRI &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Total &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Experiences Fractures &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.054 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.946 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No Fractures &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.026 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.974 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Total &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.027 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.973 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+--
+
+- Of those *experiencing fractures*, 94.6% did *not* take an SSRI. 
+    - Most patients did not take an SSRI...
+    
+---
+
+# Row and Column Proportions
+
+But does the *single variable* barplot help us determine relationships between *two* variables?
+- No!
+
+**Row** and **column proportions** give a *fractional breakdown* of one variable in another. 
+
+**Column Proportions**
+
+.center[
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt;   &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Taking SSRI &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; No SSRI &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Total &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Experiences Fractures &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.102 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.05 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.052 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; No Fractures &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.898 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.95 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.948 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Total &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.000 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+--
+
+Of those *taking an SSRI*, 10.2% experienced fractures (vs. 5.0% for the *no SSRI* group). 
+- It all depends on the denominator!
+
+---
+
+# Multivariable Barplots
+
+**Stacked** or **side-by-side** barplots are useful for visualizing the relationship between *two* categorical variables. 
+
+.pull-left[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+![](03-Summarizing_Data_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Standardized Barplots
+
+(Using **column proportions**)
+
+.center[
+&lt;img src="03-Summarizing_Data_files/figure-html/unnamed-chunk-33-1.png" width="65%" /&gt;
+]
+
+---
+
+# Pie Charts
+
+.pull-left[
+![](https://media.giphy.com/media/1ykhXVZskuM6cpBMlG/giphy.gif)
+]
+
+--
+
+.pull-right[
+**Why "eww"?**
+
+- Humans have trouble **judging angles** and **fill space**!
+
+- Also piecharts *only* measure amount out of 100%! That's it. 
+    - For this reason, they are referred to as the **Aquaman of dataviz**.
+]
+
+--
+
+.center[
+(Use barplots instead.)
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
