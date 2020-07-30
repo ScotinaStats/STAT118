@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>STAT 118: Introductory Statistics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Anthony Scotina" />
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# STAT 118: Introductory Statistics
+## Introduction to Statistics with R and RStudio
+### Anthony Scotina
+
+---
+
+
+
+
+
+
+&lt;!--
+pagedown::chrome_print("~/Dropbox/Teaching/03-Simmons Courses/MATH228-Introduction to Data Science/Lecture Slides/01-Introduction/01-Introduction.html")
+--&gt;
+
+class: center, middle, frame
+
+# Module Plan
+
+## What is .display[R]?
+
+--
+
+## Why .display[R] for doing Statistics?
+
+--
+
+## Some .display[basics]
+
+---
+
+class: center, middle, frame
+
+# What is R?
+
+---
+
+# What is R?
+
+🤔🤔🤔
+
+.center[
+&lt;img src="google.png" width="465" /&gt;
+]
+
+---
+
+# What is R?
+
+🤔🤔🤔
+
+.center[
+&lt;img src="wiki.png" width="683" /&gt;
+]
+
+--
+
+**R** is a programming language designed originally for *statistical analysis*. 
+
+- Created by **Ross Ihaka** and **Robert Gentleman** in 1993. 
+
+- Formally released by the **R Core Group** in 1997. 
+
+---
+
+# Why R?
+
+R is *popular*, and **growing**!
+
+.center[
+&lt;img src="tiobe.png" width="714" /&gt;
+]
+
+- [TIOBE index, July 2020](https://www.tiobe.com/tiobe-index/)
+
+---
+
+# Why R?
+
+R is *popular*, and **growing**!
+
+.center[
+&lt;img src="package_downloads.png" width="444" /&gt;
+]
+
+---
+
+class: center, middle, frame
+
+# Why R for doing Statistics?
+
+---
+
+# R's Strengths
+
+Handling data with different **types** of variables
+    
+- **numerical** or **categorical**, but also *time*, *location* (longitude/latitude), *text*-based data, etc.
+    
+.center[
+
+```
+## # A tibble: 6 x 7
+##    year month   day sched_dep_time dep_delay carrier dest 
+##   &lt;int&gt; &lt;int&gt; &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;
+## 1  2013     5    11            821        -3 EV      CMH  
+## 2  2013    12    24            737         7 B6      RDU  
+## 3  2013     6    25            848       117 EV      MCI  
+## 4  2013     1     9            845        -1 AA      SJU  
+## 5  2013    10     8            750        -3 B6      FLL  
+## 6  2013    10    22           1605        -8 AA      ORD
+```
+]
+    
+---
+
+# R's Strengths
+
+Making nice and complex **data visualizations**
+
+- and **customizable** - Make a visualization yours!
+    
+.center[
+&lt;img src="plot.png" width="502" /&gt;
+]
+
+---
+
+# R's Strengths
+
+Most importantly, R is **open-source**. 
+
+- There is no company that *owns* R, like there is for, say, Microsoft Excel. 
+
+- Different R *packages* are written by **users**, like you and me!
+
+--
+
+&lt;br&gt; 
+
+**You can download R and RStudio anytime you want, for free!** 
+
+- **R**: [https://www.r-project.org/](https://www.r-project.org/)
+
+- **RStudio**: [https://rstudio.com/](https://rstudio.com/)
+
+(or just use [rstudio.simmons.edu](https://rstudio.simmons.edu/auth-sign-in), for now)
+
+--
+
+&lt;br&gt;
+
+A strength of **open-source** material is that you can freely share it (e.g., code) with other users!
+
+---
+
+# Why R in STAT 118?
+
+**STAT 118** is a course in [**modern**] *Introductory Statistics*. 
+
+Two major goals are:
+
+1. Understand data and be able to *communicate* results
+
+2. **Do statistics**
+
+--
+
+Less of... `$$s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_{i}-\bar{x})^{2}}$$`
+
+More of...
+
+
+```r
+sd(~dep_delay, data = flights_data)
+```
+
+```
+## [1] 40.21006
+```
+
+---
+
+class: center, middle, frame
+
+# Some Basics
+
+---
+
+# What is RStudio?
+
+**RStudio** is an IDE (*Integrated Developer Environment*)
+
+- This basically means that RStudio is an *application* that makes it easier for you to interact with R. 
+
+--
+
+.center[
+&lt;img src="r_vs_rstudio.png" width="582" /&gt;
+]
+
+- Released in 2011 by J.J. Allaire
+
+---
+
+# What is RStudio?
+
+.center[
+&lt;img src="r-window.png" width="1104" /&gt;
+]
+
+---
+
+# R Packages
+
+A strength of **open-source** material is that you can freely share it (e.g., code) with other users!
+
+- You can also *create* R packages, which are extra sets of code that add **new functionality** to R when installed. 
+
+--
+
+&lt;br&gt;
+
+.center[
+&lt;img src="app.jpg" width="244" /&gt;
+]
+
+---
+
+# Some Example R Packages
+
+[mosaic](https://www.rdocumentation.org/packages/mosaic/versions/1.7.0)
+
+- Functions used to simplify some of the R in Introductory Statistics courses
+
+--
+
+[openintro](https://www.openintro.org/)
+
+- Contains **datasets** used in the *OpenIntro* textbook
+
+--
+
+[tidyverse](https://www.tidyverse.org/)
+
+- A *suite of packages* for **Data Science** with a common underlying framework
+
+.center[
+&lt;img src="tidyverse_hex.png" width="202" /&gt;
+]
+
+---
+
+# Other Example R Packages...
+
+[Rcade](https://github.com/RLesur/Rcade)
+
+.center[
+&lt;img src="pacman.png" width="258" /&gt;
+]
+
+---
+
+# Other Example R Packages...
+
+[pupR](https://github.com/melissanjohnson/pupR)
+
+
+
+
+```r
+library(pupR)
+pupR()
+```
+
+&lt;img src="01-Introduction_R_files/figure-html/unnamed-chunk-15-1.png" width="50%" /&gt;
+
+---
+
+# R Packages in STAT 118
+
+If you're using [rstudio.simmons.edu](https://rstudio.simmons.edu/auth-sign-in), you might have essential packages for the course already installed!
+
+- Otherwise, you'll need to **install** them, but it's painless to do so!
+
+--
+
+**To install**:
+
+.pull-left[
+&lt;img src="r-packages.png" width="357" /&gt;
+]
+
+--
+
+.pull-right[
+&lt;img src="r-install_packages.png" width="318" /&gt;
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"countIncrementalSlides": false,
+"highlightLines": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
